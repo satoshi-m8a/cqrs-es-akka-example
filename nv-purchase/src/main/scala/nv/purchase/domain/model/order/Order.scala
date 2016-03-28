@@ -63,5 +63,7 @@ case class OrderState(items: Set[Item]) extends AggregateState[OrderState, Order
   override def handle: HandleState = {
     case evt: OrderPlaced ⇒
       copy(items = evt.items)
+    case evt: OrderCanceled ⇒
+      this
   }
 }

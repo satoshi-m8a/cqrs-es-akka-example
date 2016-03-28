@@ -18,7 +18,7 @@ trait OrderProcess {
     case Event(PointUseProcessed(), _) ⇒
       log.info("start order process")
 
-      stay forMax 5.seconds andThen {
+      stay forMax 3.seconds andThen {
         case PurchaseProcessData(Some(r), _, true, false, false) ⇒
           order ! Order.Commands.PlaceOrder(r.orderId, r.items)
       }
@@ -37,10 +37,7 @@ trait OrderProcess {
       * オーダーのキャンセルが完了したら、ポイント処理(PointProcessing)へ戻る。
       */
     case Event(Order.Events.OrderCanceled(_), _) ⇒
-      goto(PointProcessing) applying CancelOrderProcessed() forMax 1.second andThen {
-        case e ⇒
-          self ! CancelOrderProcessed()
-      }
+      goto(PointProcessing) applying CancelOrderProcessed() forMax 1.second
 
     /**
       * タイムアウトが発生したら、オーダーをキャンセルする

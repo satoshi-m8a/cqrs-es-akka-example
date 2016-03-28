@@ -38,13 +38,20 @@ class PurchaseProcessManagerSpec extends TestSupport {
       case cmd: PointWallet.Commands.CancelUsePoint ⇒
         remoteEventMediator.publish(PointWallet.Events.UsePointCanceled(cmd.id, cmd.orderId), s"Order-${cmd.orderId.value}")
     }
-  }))
+  }), name = "walletmock")
+
+  val orderMock = system.actorOf(Props(new Actor {
+    override def receive: Receive = {
+      case cmd: Order.Commands.CancelOrder ⇒
+        remoteEventMediator.publish(Order.Events.OrderCanceled(cmd.id), s"Order-${cmd.id.value}")
+    }
+  }), name = "ordermock")
 
   "Purchase Process" should {
     "complete order process" in {
 
-      val pointWallet = system.actorOf(PointWallet.props(remoteEventMediator))
-      val order = system.actorOf(Order.props(remoteEventMediator))
+      val pointWallet = system.actorOf(PointWallet.props(remoteEventMediator), name = "point1")
+      val order = system.actorOf(Order.props(remoteEventMediator), name = "order1")
 
       val orderId = Order.nextId
       val accountId = Account.nextId
@@ -55,10 +62,10 @@ class PurchaseProcessManagerSpec extends TestSupport {
       expectMsg(PurchaseProcessCompleted(orderId, accountId))
     }
 
-    "recover when fail" in {
+    "recover when fail point process" in {
       val remoteEventMediator = new RemoteEventMediator(system)
 
-      val order = system.actorOf(Order.props(remoteEventMediator))
+      val order = system.actorOf(Order.props(remoteEventMediator), name = "order2")
 
       val orderId = Order.nextId
       val accountId = Account.nextId
@@ -66,7 +73,20 @@ class PurchaseProcessManagerSpec extends TestSupport {
 
       pp ! Purchase(orderId, Set(Item(ProductId("1"), 100, 10), Item(ProductId("2"), 300, 100)), accountId)
 
-      expectMsg(20.seconds, PurchaseProcessCanceled(orderId, accountId))
+      expectMsg(10.seconds, PurchaseProcessCanceled(orderId, accountId))
+    }
+
+    "recover when fail order process" in {
+
+      val pointWallet = system.actorOf(PointWallet.props(remoteEventMediator), name = "point3")
+
+      val orderId = Order.nextId
+      val accountId = Account.nextId
+      val pp = system.actorOf(PurchaseProcessManager.remoteProps(pointWallet, orderMock, productService), name = orderId.value)
+
+      pp ! Purchase(orderId, Set(Item(ProductId("1"), 100, 10), Item(ProductId("2"), 300, 100)), accountId)
+
+      expectMsg(10.seconds, PurchaseProcessCanceled(orderId, accountId))
     }
   }
 }

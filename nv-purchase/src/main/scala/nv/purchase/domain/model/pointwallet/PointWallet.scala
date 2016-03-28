@@ -1,10 +1,10 @@
 package nv.purchase.domain.model.pointwallet
 
-import akka.actor.Props
+import akka.actor.{ ActorLogging, Props }
 import nv.account.domain.model.account.AccountId
 import nv.common.ddd.domain._
 import nv.purchase.domain.model.order.OrderId
-import nv.purchase.domain.model.pointwallet.PointWallet.Commands.{ ChargePoint, UsePoint }
+import nv.purchase.domain.model.pointwallet.PointWallet.Commands.{ CancelUsePoint, ChargePoint, UsePoint }
 import nv.purchase.domain.model.pointwallet.PointWallet.Events.{ PointCharged, PointUsed, PointWalletEvent, UsePointCanceled }
 
 import scala.reflect._
@@ -42,7 +42,7 @@ object PointWallet {
 
 }
 
-class PointWallet[T <: Seq[_]](eventMediator: EventMediator[T]) extends AggregateRoot[PointWalletState, PointWalletEvent] {
+class PointWallet[T <: Seq[_]](eventMediator: EventMediator[T]) extends AggregateRoot[PointWalletState, PointWalletEvent] with ActorLogging {
   override val domainEventClassTag: ClassTag[PointWalletEvent] = classTag[PointWalletEvent]
 
   override val aggregateStateClassTag: ClassTag[PointWalletState] = classTag[PointWalletState]
@@ -54,6 +54,10 @@ class PointWallet[T <: Seq[_]](eventMediator: EventMediator[T]) extends Aggregat
     case cmd: UsePoint ⇒
       //TODO
       raise(PointUsed(cmd.id, cmd.orderId, cmd.point, 999))
+    case cmd: CancelUsePoint ⇒
+      //TODO
+      log.info("cancel point")
+      raise(UsePointCanceled(cmd.id, cmd.orderId))
   }
 
   override def afterEvent: ReceiveEvent = {
@@ -69,6 +73,8 @@ case class PointWalletState() extends AggregateState[PointWalletState, PointWall
     case evt: PointCharged ⇒
       this
     case evt: PointUsed ⇒
+      this
+    case evt: UsePointCanceled ⇒
       this
   }
 }
