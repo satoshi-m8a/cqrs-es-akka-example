@@ -20,7 +20,8 @@ CQRS+イベントソーシングのサンプルコードです。
 
 ### コンテキスト
 各コンテキストの説明はそれぞれのサブプロジェクト内のREADMEを御覧ください。
- - アカウント(nv-account)
+ - アカウント(nv-account)  
+ 　Akkaを使わずに実装
  - サイト(nv-site)
  - ディスカッション(nv-discussion)  
  　CQRS+ESで実装
