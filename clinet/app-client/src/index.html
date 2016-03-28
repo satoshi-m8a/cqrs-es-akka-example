@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title><%= TITLE %></title>
+    <!-- inject:css -->
+    <!-- endinject -->
+</head>
+<body>
+<nv-app></nv-app>
+<!-- inject:js -->
+<!-- endinject -->
+<!-- <% if (ENV === 'dev') { %> -->
+<script>
+    System.config({
+        packages: {
+            app: {
+                format: 'register',
+                defaultExtension: 'js'
+            }
+        }
+    });
+    System.import('main.js').then(null, console.error.bind(console));
+</script>
+<!-- <% } %> -->
+<!-- <% if (ENV === 'prod') { %> -->
+<script>
+    function module() {}
+</script>
+<script src="bundle.js"></script>
+<!-- <% } %> -->
+</body>
+</html>

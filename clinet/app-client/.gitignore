@@ -1,0 +1,6 @@
+/typings
+/node_modules
+/src/main.ts
+/build
+/src/config.ts
+/dist
