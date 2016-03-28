@@ -11,14 +11,14 @@ import scala.concurrent.duration._
 trait OrderProcess {
   this: PurchaseProcessManager[_] ⇒
 
-  when(OrderProcessing, 5.seconds) {
+  when(OrderProcessing, 1.seconds) {
     /**
       * ポイント処理(PointProcessing)から遷移してくる。
       */
     case Event(PointUseProcessed(), _) ⇒
       log.info("start order process")
 
-      stay forMax 10.seconds andThen {
+      stay forMax 5.seconds andThen {
         case PurchaseProcessData(Some(r), _, true, false, false) ⇒
           order ! Order.Commands.PlaceOrder(r.orderId, r.items)
       }
@@ -46,7 +46,7 @@ trait OrderProcess {
       * タイムアウトが発生したら、オーダーをキャンセルする
       */
     case Event(StateTimeout, _) ⇒
-      stay forMax 10.seconds andThen {
+      stay forMax 5.seconds andThen {
         case PurchaseProcessData(Some(r), _, _, _, _) ⇒
           order ! Order.Commands.CancelOrder(r.orderId)
       }

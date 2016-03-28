@@ -15,7 +15,7 @@ trait RegistrationProcess {
 
   case object CancelCompleted
 
-  when(RegistrationProcessing, 5.seconds) {
+  when(RegistrationProcessing, 1.seconds) {
     /**
       * オーダー処理(OrderProcessing)から遷移してくる。
       */
@@ -33,7 +33,7 @@ trait RegistrationProcess {
       * 登録処理が完了したら、購入完了状態(PurchaseCompleted)へ遷移する。
       */
     case Event(BuyCompleted, _) ⇒
-      goto(PurchaseCompleted) applying RegistrationProcessed() forMax 10.seconds andThen {
+      goto(PurchaseCompleted) applying RegistrationProcessed() forMax 5.seconds andThen {
         case e ⇒
           self ! RegistrationProcessed()
       }

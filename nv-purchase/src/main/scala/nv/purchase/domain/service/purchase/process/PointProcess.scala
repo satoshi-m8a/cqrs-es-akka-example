@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 trait PointProcess {
   this: PurchaseProcessManager[_] ⇒
 
-  when(PointProcessing, 5.seconds) {
+  when(PointProcessing, 1.seconds) {
     /**
       * 初期状態(BeforeStart)から遷移してくる。
       */
@@ -21,7 +21,7 @@ trait PointProcess {
 
       val totalPoint = Item.getTotalPoint(request.items)
 
-      stay forMax 10.seconds andThen {
+      stay forMax 3.seconds andThen {
         case PurchaseProcessData(Some(r), _, false, false, false) ⇒
           pointWallet ! PointWallet.Commands.UsePoint(r.accountId, r.orderId, totalPoint)
       }
@@ -31,7 +31,7 @@ trait PointProcess {
       */
     case Event(PointWallet.Events.PointUsed(accountI, orderId, point, _), _) ⇒
       log.info("handle point used")
-      goto(OrderProcessing) applying PointUseProcessed() forMax 10.seconds andThen {
+      goto(OrderProcessing) applying PointUseProcessed() forMax 1.seconds andThen {
         case e ⇒
           self ! PointUseProcessed()
       }
@@ -40,6 +40,7 @@ trait PointProcess {
       * キャンセルが完了したら、初期状態(BeforeStart)に戻る。
       */
     case Event(PointWallet.Events.UsePointCanceled(_, _), _) ⇒
+      log.info("handle point cancel")
       goto(BeforeStart) applying CancelPointUseProcessed() andThen {
         case e ⇒
           self ! CancelPointUseProcessed()
@@ -49,7 +50,8 @@ trait PointProcess {
       * タイムアウトが発生したら、ポイントの利用をキャンセルする
       */
     case Event(StateTimeout, _) ⇒
-      stay forMax 10.seconds andThen {
+      log.warning("point processing timeout")
+      stay forMax 3.seconds andThen {
         case PurchaseProcessData(Some(r), _, _, _, _) ⇒
           pointWallet ! PointWallet.Commands.CancelUsePoint(r.accountId, r.orderId)
       }

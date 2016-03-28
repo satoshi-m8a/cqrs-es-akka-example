@@ -97,6 +97,8 @@ object PurchaseProcessManager {
 
     case class PurchaseProcessCompleted(orderId: OrderId, accountId: AccountId) extends PurchaseProcessEvent
 
+    case class PurchaseProcessCanceled(orderId: OrderId, accountId: AccountId) extends PurchaseProcessEvent
+
   }
 
   object Data {
@@ -138,19 +140,24 @@ abstract class PurchaseProcessManager[T <: Seq[_]](val eventMediator: EventMedia
       currentData.copy(registrationProcessed = false)
     case evt: PurchaseProcessCompleted ⇒
       currentData
+    case evt: PurchaseProcessCanceled ⇒
+      currentData
   }
 
   startWith(BeforeStart, PurchaseProcessData(None, None, false, false, false))
 
-  when(BeforeStart, 5.seconds) {
+  when(BeforeStart, 1.seconds) {
     case Event(Purchase(orderId, items, accountId), _) ⇒
       log.info("start order {}", orderId)
       val replyTo = sender()
       val request = PurchaseRequest(orderId, accountId, items)
-      goto(PointProcessing) applying PurchaseStarted(request, replyTo) forMax 10.seconds andThen {
+      goto(PointProcessing) applying PurchaseStarted(request, replyTo) forMax 5.seconds andThen {
         case e ⇒
           self ! PurchaseStarted(request, replyTo)
       }
+    case Event(CancelPointUseProcessed(), PurchaseProcessData(Some(r), sender, _, _, _)) ⇒
+      sender.foreach(s ⇒ s ! PurchaseProcessCanceled(r.orderId, r.accountId))
+      stop()
   }
 
   when(PurchaseCompleted, 5.seconds) {

@@ -1,8 +1,7 @@
 package nv.common.ddd.domain
 
 import akka.actor.{ ActorRef, ActorSystem }
-import akka.cluster.client.ClusterClient.Publish
-import akka.cluster.pubsub.DistributedPubSubMediator.Unsubscribe
+import akka.cluster.pubsub.DistributedPubSubMediator.{ Publish, Unsubscribe }
 import akka.cluster.pubsub.{ DistributedPubSub, DistributedPubSubMediator }
 
 trait EventMediator[E <: Seq[_]] {
