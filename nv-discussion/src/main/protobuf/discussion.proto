@@ -1,0 +1,18 @@
+option java_package = "nv.discussion.domain.model.discussion";
+
+option java_outer_classname = "DiscussionProtos";
+
+option optimize_for = SPEED;
+
+message DiscussionCreated {
+    required string id = 1;
+    required string title = 2;
+    required bool allow_anonymous = 3;
+}
+
+message CommentAdded {
+    required string id = 1;
+    required int64 comment_id = 2;
+    required string text = 3;
+    required string comment_by = 4;
+}
