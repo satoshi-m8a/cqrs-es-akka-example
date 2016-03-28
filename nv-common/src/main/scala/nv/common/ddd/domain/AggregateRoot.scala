@@ -53,7 +53,7 @@ trait AggregateRoot[S <: AggregateState[S, E], E <: DomainEvent] extends Persist
 
   private var stateOpt: Option[S] = None
 
-  def state: S = stateOpt.getOrElse(throw StateNotInitialized)
+  def state: S = stateOpt.getOrElse(initialState)
 
   def initialized = stateOpt.isDefined
 

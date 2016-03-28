@@ -32,9 +32,9 @@ object PointWallet {
 
     sealed trait PointWalletEvent extends DomainEvent
 
-    case class PointCharged(id: AccountId) extends PointWalletEvent
+    case class PointCharged(id: AccountId, chargedPoint: Long, remainedPoint: Long) extends PointWalletEvent
 
-    case class PointUsed(id: AccountId, orderId: OrderId, point: Long, remainedPoint: Long) extends PointWalletEvent
+    case class PointUsed(id: AccountId, orderId: OrderId, usedPoint: Long, remainedPoint: Long) extends PointWalletEvent
 
     case class UsePointCanceled(id: AccountId, orderId: OrderId) extends PointWalletEvent
 
@@ -47,28 +47,36 @@ class PointWallet extends AggregateRoot[PointWalletState, PointWalletEvent] with
 
   override val aggregateStateClassTag: ClassTag[PointWalletState] = classTag[PointWalletState]
 
-  override def initialState: PointWalletState = PointWalletState()
+  override def initialState: PointWalletState = PointWalletState(0L, Map.empty)
 
   override def handleCommand: Receive = {
     case cmd: ChargePoint ⇒
+      raise(PointCharged(cmd.id, cmd.point, state.currentPoint + cmd.point))
     case cmd: UsePoint ⇒
-      //TODO
-      raise(PointUsed(cmd.id, cmd.orderId, cmd.point, 999))
+      raise(PointUsed(cmd.id, cmd.orderId, cmd.point, state.currentPoint - cmd.point))
     case cmd: CancelUsePoint ⇒
-      //TODO
-      log.info("cancel point")
-      raise(UsePointCanceled(cmd.id, cmd.orderId))
+      if (state.orderPoint.keys.exists(_ == cmd.orderId)) {
+        raise(UsePointCanceled(cmd.id, cmd.orderId))
+      } else {
+        //オーダーが見つからないかキャンセル済みであれば、キャンセル済みと返事する。
+        sender() ! UsePointCanceled(cmd.id, cmd.orderId)
+      }
   }
 
 }
 
-case class PointWalletState() extends AggregateState[PointWalletState, PointWalletEvent] {
+case class PointWalletState(currentPoint: Long, orderPoint: Map[OrderId, Long]) extends AggregateState[PointWalletState, PointWalletEvent] {
   override def handle: HandleState = {
     case evt: PointCharged ⇒
-      this
+      copy(currentPoint = evt.remainedPoint)
     case evt: PointUsed ⇒
-      this
+      copy(currentPoint = evt.remainedPoint, orderPoint = this.orderPoint + (evt.orderId → evt.usedPoint))
     case evt: UsePointCanceled ⇒
-      this
+      orderPoint.get(evt.orderId) match {
+        case Some(point) ⇒
+          copy(currentPoint = this.currentPoint + point, orderPoint = this.orderPoint - evt.orderId)
+        case _ ⇒
+          this
+      }
   }
 }
