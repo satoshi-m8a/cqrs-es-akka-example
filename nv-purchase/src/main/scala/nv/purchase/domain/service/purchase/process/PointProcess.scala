@@ -10,13 +10,14 @@ import nv.purchase.domain.service.purchase.PurchaseProcessManager.States.{ Befor
 import scala.concurrent.duration._
 
 trait PointProcess {
-  this: PurchaseProcessManager ⇒
+  this: PurchaseProcessManager[_] ⇒
 
   when(PointProcessing, 5.seconds) {
     /**
       * 初期状態(BeforeStart)から遷移してくる。
       */
     case Event(PurchaseStarted(_, _), PurchaseProcessData(Some(request), _, _, _, _)) ⇒
+      log.info("start point process")
 
       val totalPoint = Item.getTotalPoint(request.items)
 
@@ -29,13 +30,20 @@ trait PointProcess {
       * ポイントの利用が完了したら、オーダー処理(OrderProcessing)に遷移する。
       */
     case Event(PointWallet.Events.PointUsed(accountI, orderId, point, _), _) ⇒
-      goto(OrderProcessing) applying PointUseProcessed() forMax 10.seconds
+      log.info("handle point used")
+      goto(OrderProcessing) applying PointUseProcessed() forMax 10.seconds andThen {
+        case e ⇒
+          self ! PointUseProcessed()
+      }
 
     /**
       * キャンセルが完了したら、初期状態(BeforeStart)に戻る。
       */
     case Event(PointWallet.Events.UsePointCanceled(_, _), _) ⇒
-      goto(BeforeStart) applying CancelPointUseProcessed()
+      goto(BeforeStart) applying CancelPointUseProcessed() andThen {
+        case e ⇒
+          self ! CancelPointUseProcessed()
+      }
 
     /**
       * タイムアウトが発生したら、ポイントの利用をキャンセルする

@@ -1,17 +1,19 @@
 package nv.purchase.domain.service.purchase
 
-import akka.actor.ActorRef
+import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.fsm.PersistentFSM
 import akka.persistence.fsm.PersistentFSM.FSMState
 import nv.account.domain.model.account.AccountId
-import nv.common.ddd.domain.{ Command, DomainEvent, SubScribeExternalEvent }
+import nv.common.ddd.domain._
 import nv.market.application.ProductService
+import nv.purchase.domain.model.order.Order.Events.OrderEvent
 import nv.purchase.domain.model.order.{ Item, OrderId }
+import nv.purchase.domain.model.pointwallet.PointWallet.Events.PointWalletEvent
 import nv.purchase.domain.service.purchase.PurchaseProcessManager.Commands.Purchase
 import nv.purchase.domain.service.purchase.PurchaseProcessManager.Data.{ PurchaseProcessData, PurchaseRequest }
 import nv.purchase.domain.service.purchase.PurchaseProcessManager.Events._
 import nv.purchase.domain.service.purchase.PurchaseProcessManager.States.{ BeforeStart, PointProcessing, PurchaseCompleted, PurchaseProcessState }
-import nv.purchase.domain.service.purchase.process.{ OrderProcess, PointProcess }
+import nv.purchase.domain.service.purchase.process.{ OrderProcess, PointProcess, RegistrationProcess }
 
 import scala.concurrent.duration._
 import scala.reflect._
@@ -20,6 +22,26 @@ import scala.reflect._
   * ポイントの利用、注文の作成、商品（記事、サイト）購入者の登録を行う。
   */
 object PurchaseProcessManager {
+
+  def remoteProps(pointWallet: ActorRef, order: ActorRef, productService: ProductService)(implicit system: ActorSystem) = {
+    val remoteEventMediator = new RemoteEventMediator(system)
+
+    Props(new PurchaseProcessManager[Seq[String]](remoteEventMediator, pointWallet, order, productService) {
+      override def startSubscribe(): Unit = {
+        eventMediator.startSubscribe(Seq(s"Order-${self.path.name}"), self)
+      }
+    })
+  }
+
+  def props(pointWallet: ActorRef, order: ActorRef, productService: ProductService)(implicit system: ActorSystem) = {
+    val localEventMediator = new LocalEventMediator(system)
+
+    Props(new PurchaseProcessManager[Seq[Class[_]]](localEventMediator, pointWallet, order, productService) {
+      override def startSubscribe(): Unit = {
+        eventMediator.startSubscribe(Seq(classOf[OrderEvent], classOf[PointWalletEvent]), self)
+      }
+    })
+  }
 
   object States {
 
@@ -87,11 +109,17 @@ object PurchaseProcessManager {
 
 }
 
-abstract class PurchaseProcessManager(val pointWallet: ActorRef, val order: ActorRef, val productService: ProductService)
-    extends PersistentFSM[PurchaseProcessState, PurchaseProcessData, PurchaseProcessEvent] with SubScribeExternalEvent with PointProcess with OrderProcess {
+abstract class PurchaseProcessManager[T <: Seq[_]](val eventMediator: EventMediator[T], val pointWallet: ActorRef, val order: ActorRef, val productService: ProductService)
+    extends PersistentFSM[PurchaseProcessState, PurchaseProcessData, PurchaseProcessEvent] with PointProcess with OrderProcess with RegistrationProcess with ActorLogging {
   override def domainEventClassTag: ClassTag[PurchaseProcessEvent] = classTag[PurchaseProcessEvent]
 
   override def persistenceId: String = self.path.parent.name + "-" + self.path.name
+
+  def startSubscribe(): Unit
+
+  override def preStart(): Unit = {
+    startSubscribe()
+  }
 
   override def applyEvent(domainEvent: PurchaseProcessEvent, currentData: PurchaseProcessData): PurchaseProcessData = domainEvent match {
     case evt: PurchaseStarted ⇒
@@ -116,13 +144,18 @@ abstract class PurchaseProcessManager(val pointWallet: ActorRef, val order: Acto
 
   when(BeforeStart, 5.seconds) {
     case Event(Purchase(orderId, items, accountId), _) ⇒
+      log.info("start order {}", orderId)
       val replyTo = sender()
       val request = PurchaseRequest(orderId, accountId, items)
-      goto(PointProcessing) applying PurchaseStarted(request, replyTo) forMax 10.seconds
+      goto(PointProcessing) applying PurchaseStarted(request, replyTo) forMax 10.seconds andThen {
+        case e ⇒
+          self ! PurchaseStarted(request, replyTo)
+      }
   }
 
   when(PurchaseCompleted, 5.seconds) {
     case Event(RegistrationProcessed(), PurchaseProcessData(Some(r), sender, _, _, _)) ⇒
+      log.info("complete order {}", r.orderId)
       sender.foreach { s ⇒
         s ! PurchaseProcessCompleted(r.orderId, r.accountId)
       }

@@ -9,13 +9,15 @@ import nv.purchase.domain.service.purchase.PurchaseProcessManager.States.{ Order
 import scala.concurrent.duration._
 
 trait OrderProcess {
-  this: PurchaseProcessManager ⇒
+  this: PurchaseProcessManager[_] ⇒
 
   when(OrderProcessing, 5.seconds) {
     /**
       * ポイント処理(PointProcessing)から遷移してくる。
       */
     case Event(PointUseProcessed(), _) ⇒
+      log.info("start order process")
+
       stay forMax 10.seconds andThen {
         case PurchaseProcessData(Some(r), _, true, false, false) ⇒
           order ! Order.Commands.PlaceOrder(r.orderId, r.items)
@@ -25,13 +27,20 @@ trait OrderProcess {
       * オーダーが完了したら、登録処理(RegistrationProcessing)へ遷移する。
       */
     case Event(Order.Events.OrderPlaced(_, _), _) ⇒
-      goto(RegistrationProcessing) applying OrderProcessed()
+      log.info("handle order placed")
+      goto(RegistrationProcessing) applying OrderProcessed() andThen {
+        case e ⇒
+          self ! OrderProcessed()
+      }
 
     /**
       * オーダーのキャンセルが完了したら、ポイント処理(PointProcessing)へ戻る。
       */
     case Event(Order.Events.OrderCanceled(_), _) ⇒
-      goto(PointProcessing) applying CancelOrderProcessed() forMax 1.second
+      goto(PointProcessing) applying CancelOrderProcessed() forMax 1.second andThen {
+        case e ⇒
+          self ! CancelOrderProcessed()
+      }
 
     /**
       * タイムアウトが発生したら、オーダーをキャンセルする

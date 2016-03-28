@@ -2,16 +2,16 @@ package nv.purchase.domain.model.order
 
 import java.util.UUID
 
-import akka.actor.{ Props, ActorRef }
-import nv.common.ddd.domain.{ AggregateRoot, AggregateState, Command, DomainEvent }
+import akka.actor.{ ActorLogging, Props }
+import nv.common.ddd.domain._
 import nv.purchase.domain.model.order.Order.Commands.PlaceOrder
-import nv.purchase.domain.model.order.Order.Events.{ OrderEvent, OrderPlaced }
+import nv.purchase.domain.model.order.Order.Events.{ OrderCanceled, OrderEvent, OrderPlaced }
 
 import scala.reflect._
 
 object Order {
 
-  def props(eventMediator: ActorRef) = Props(new Order(eventMediator))
+  def props[T <: Seq[_]](eventMediator: EventMediator[T]) = Props(new Order[T](eventMediator))
 
   def nextId: OrderId = OrderId(UUID.randomUUID().toString)
 
@@ -37,22 +37,25 @@ object Order {
 
 }
 
-class Order(eventMediator: ActorRef) extends AggregateRoot[OrderState, OrderEvent] {
-  override implicit def domainEventClassTag: ClassTag[OrderEvent] = classTag[OrderEvent]
+class Order[T <: Seq[_]](eventMediator: EventMediator[T]) extends AggregateRoot[OrderState, OrderEvent] with ActorLogging {
+  override val domainEventClassTag: ClassTag[OrderEvent] = classTag[OrderEvent]
 
-  override implicit def aggregateStateClassTag: ClassTag[OrderState] = classTag[OrderState]
+  override val aggregateStateClassTag: ClassTag[OrderState] = classTag[OrderState]
 
   override def initialState: OrderState = OrderState(Set.empty)
 
   override def handleCommand: Receive = {
     case cmd: PlaceOrder ⇒ {
+      log.info("handle place order command")
       raise(OrderPlaced(cmd.id, cmd.items))
     }
   }
 
   override def afterEvent: ReceiveEvent = {
     case evt: OrderPlaced ⇒
-      eventMediator ! evt
+      eventMediator.publish(evt, s"Order-${evt.id.value}")
+    case evt: OrderCanceled ⇒
+      eventMediator.publish(evt, s"Order-${evt.id.value}")
   }
 }
 

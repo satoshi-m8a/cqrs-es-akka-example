@@ -1,10 +1,11 @@
 package nv.purchase.domain.model.pointwallet
 
+import akka.actor.Props
 import nv.account.domain.model.account.AccountId
-import nv.common.ddd.domain.{ Command, AggregateState, DomainEvent, AggregateRoot }
+import nv.common.ddd.domain._
 import nv.purchase.domain.model.order.OrderId
-import nv.purchase.domain.model.pointwallet.PointWallet.Commands.{ UsePoint, ChargePoint }
-import nv.purchase.domain.model.pointwallet.PointWallet.Events.{ PointUsed, PointCharged, PointWalletEvent }
+import nv.purchase.domain.model.pointwallet.PointWallet.Commands.{ ChargePoint, UsePoint }
+import nv.purchase.domain.model.pointwallet.PointWallet.Events.{ PointCharged, PointUsed, PointWalletEvent, UsePointCanceled }
 
 import scala.reflect._
 
@@ -12,6 +13,8 @@ import scala.reflect._
   * ポイントのチャージ、利用を管理する
   */
 object PointWallet {
+
+  def props[T <: Seq[_]](eventMediator: EventMediator[T]) = Props(new PointWallet[T](eventMediator))
 
   object Commands {
 
@@ -39,18 +42,26 @@ object PointWallet {
 
 }
 
-class PointWallet extends AggregateRoot[PointWalletState, PointWalletEvent] {
-  override implicit def domainEventClassTag: ClassTag[PointWalletEvent] = classTag[PointWalletEvent]
+class PointWallet[T <: Seq[_]](eventMediator: EventMediator[T]) extends AggregateRoot[PointWalletState, PointWalletEvent] {
+  override val domainEventClassTag: ClassTag[PointWalletEvent] = classTag[PointWalletEvent]
 
-  override implicit def aggregateStateClassTag: ClassTag[PointWalletState] = classTag[PointWalletState]
+  override val aggregateStateClassTag: ClassTag[PointWalletState] = classTag[PointWalletState]
 
   override def initialState: PointWalletState = PointWalletState()
 
   override def handleCommand: Receive = {
     case cmd: ChargePoint ⇒
-    case cmd: UsePoint    ⇒
+    case cmd: UsePoint ⇒
+      //TODO
+      raise(PointUsed(cmd.id, cmd.orderId, cmd.point, 999))
   }
 
+  override def afterEvent: ReceiveEvent = {
+    case evt: PointUsed ⇒
+      eventMediator.publish(evt, s"Order-${evt.orderId.value}")
+    case evt: UsePointCanceled ⇒
+      eventMediator.publish(evt, s"Order-${evt.orderId.value}")
+  }
 }
 
 case class PointWalletState() extends AggregateState[PointWalletState, PointWalletEvent] {
