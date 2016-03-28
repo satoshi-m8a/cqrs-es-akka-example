@@ -14,7 +14,7 @@ import scala.reflect._
   */
 object PointWallet {
 
-  def props[T <: Seq[_]](eventMediator: EventMediator[T]) = Props(new PointWallet[T](eventMediator))
+  def props = Props[PointWallet]
 
   object Commands {
 
@@ -42,7 +42,7 @@ object PointWallet {
 
 }
 
-class PointWallet[T <: Seq[_]](eventMediator: EventMediator[T]) extends AggregateRoot[PointWalletState, PointWalletEvent] with ActorLogging {
+class PointWallet extends AggregateRoot[PointWalletState, PointWalletEvent] with ActorLogging {
   override val domainEventClassTag: ClassTag[PointWalletEvent] = classTag[PointWalletEvent]
 
   override val aggregateStateClassTag: ClassTag[PointWalletState] = classTag[PointWalletState]
@@ -60,12 +60,6 @@ class PointWallet[T <: Seq[_]](eventMediator: EventMediator[T]) extends Aggregat
       raise(UsePointCanceled(cmd.id, cmd.orderId))
   }
 
-  override def afterEvent: ReceiveEvent = {
-    case evt: PointUsed ⇒
-      eventMediator.publish(evt, s"Order-${evt.orderId.value}")
-    case evt: UsePointCanceled ⇒
-      eventMediator.publish(evt, s"Order-${evt.orderId.value}")
-  }
 }
 
 case class PointWalletState() extends AggregateState[PointWalletState, PointWalletEvent] {

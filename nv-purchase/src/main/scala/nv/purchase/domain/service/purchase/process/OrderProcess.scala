@@ -9,7 +9,7 @@ import nv.purchase.domain.service.purchase.PurchaseProcessManager.States.{ Order
 import scala.concurrent.duration._
 
 trait OrderProcess {
-  this: PurchaseProcessManager[_] ⇒
+  this: PurchaseProcessManager ⇒
 
   when(OrderProcessing, 1.seconds) {
     /**

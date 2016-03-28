@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 trait RegistrationProcess {
-  this: PurchaseProcessManager[_] ⇒
+  this: PurchaseProcessManager ⇒
 
   case object BuyCompleted
 

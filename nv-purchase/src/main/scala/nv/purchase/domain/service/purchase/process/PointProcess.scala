@@ -10,7 +10,7 @@ import nv.purchase.domain.service.purchase.PurchaseProcessManager.States.{ Befor
 import scala.concurrent.duration._
 
 trait PointProcess {
-  this: PurchaseProcessManager[_] ⇒
+  this: PurchaseProcessManager ⇒
 
   when(PointProcessing, 1.seconds) {
     /**

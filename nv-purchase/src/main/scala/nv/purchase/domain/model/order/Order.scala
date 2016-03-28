@@ -11,7 +11,7 @@ import scala.reflect._
 
 object Order {
 
-  def props[T <: Seq[_]](eventMediator: EventMediator[T]) = Props(new Order[T](eventMediator))
+  def props = Props[Order]
 
   def nextId: OrderId = OrderId(UUID.randomUUID().toString)
 
@@ -37,7 +37,7 @@ object Order {
 
 }
 
-class Order[T <: Seq[_]](eventMediator: EventMediator[T]) extends AggregateRoot[OrderState, OrderEvent] with ActorLogging {
+class Order extends AggregateRoot[OrderState, OrderEvent] with ActorLogging {
   override val domainEventClassTag: ClassTag[OrderEvent] = classTag[OrderEvent]
 
   override val aggregateStateClassTag: ClassTag[OrderState] = classTag[OrderState]
@@ -51,12 +51,6 @@ class Order[T <: Seq[_]](eventMediator: EventMediator[T]) extends AggregateRoot[
     }
   }
 
-  override def afterEvent: ReceiveEvent = {
-    case evt: OrderPlaced ⇒
-      eventMediator.publish(evt, s"Order-${evt.id.value}")
-    case evt: OrderCanceled ⇒
-      eventMediator.publish(evt, s"Order-${evt.id.value}")
-  }
 }
 
 case class OrderState(items: Set[Item]) extends AggregateState[OrderState, OrderEvent] {

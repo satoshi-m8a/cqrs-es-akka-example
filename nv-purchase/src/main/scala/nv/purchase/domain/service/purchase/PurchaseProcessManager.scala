@@ -6,9 +6,7 @@ import akka.persistence.fsm.PersistentFSM.FSMState
 import nv.account.domain.model.account.AccountId
 import nv.common.ddd.domain._
 import nv.market.application.ProductService
-import nv.purchase.domain.model.order.Order.Events.OrderEvent
 import nv.purchase.domain.model.order.{ Item, OrderId }
-import nv.purchase.domain.model.pointwallet.PointWallet.Events.PointWalletEvent
 import nv.purchase.domain.service.purchase.PurchaseProcessManager.Commands.Purchase
 import nv.purchase.domain.service.purchase.PurchaseProcessManager.Data.{ PurchaseProcessData, PurchaseRequest }
 import nv.purchase.domain.service.purchase.PurchaseProcessManager.Events._
@@ -23,24 +21,8 @@ import scala.reflect._
   */
 object PurchaseProcessManager {
 
-  def remoteProps(pointWallet: ActorRef, order: ActorRef, productService: ProductService)(implicit system: ActorSystem) = {
-    val remoteEventMediator = new RemoteEventMediator(system)
-
-    Props(new PurchaseProcessManager[Seq[String]](remoteEventMediator, pointWallet, order, productService) {
-      override def startSubscribe(): Unit = {
-        eventMediator.startSubscribe(Seq(s"Order-${self.path.name}"), self)
-      }
-    })
-  }
-
   def props(pointWallet: ActorRef, order: ActorRef, productService: ProductService)(implicit system: ActorSystem) = {
-    val localEventMediator = new LocalEventMediator(system)
-
-    Props(new PurchaseProcessManager[Seq[Class[_]]](localEventMediator, pointWallet, order, productService) {
-      override def startSubscribe(): Unit = {
-        eventMediator.startSubscribe(Seq(classOf[OrderEvent], classOf[PointWalletEvent]), self)
-      }
-    })
+    Props(new PurchaseProcessManager(pointWallet, order, productService))
   }
 
   object States {
@@ -111,17 +93,11 @@ object PurchaseProcessManager {
 
 }
 
-abstract class PurchaseProcessManager[T <: Seq[_]](val eventMediator: EventMediator[T], val pointWallet: ActorRef, val order: ActorRef, val productService: ProductService)
+class PurchaseProcessManager(val pointWallet: ActorRef, val order: ActorRef, val productService: ProductService)
     extends PersistentFSM[PurchaseProcessState, PurchaseProcessData, PurchaseProcessEvent] with PointProcess with OrderProcess with RegistrationProcess with ActorLogging {
   override def domainEventClassTag: ClassTag[PurchaseProcessEvent] = classTag[PurchaseProcessEvent]
 
   override def persistenceId: String = self.path.parent.name + "-" + self.path.name
-
-  def startSubscribe(): Unit
-
-  override def preStart(): Unit = {
-    startSubscribe()
-  }
 
   override def applyEvent(domainEvent: PurchaseProcessEvent, currentData: PurchaseProcessData): PurchaseProcessData = domainEvent match {
     case evt: PurchaseStarted ⇒
