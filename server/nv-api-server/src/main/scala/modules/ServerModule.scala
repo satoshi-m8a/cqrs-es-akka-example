@@ -10,6 +10,7 @@ import registry.DiscussionServiceRegistry
 import scala.concurrent.Future
 
 //TODO
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class ServerModule extends Module {
   def bindings(
@@ -28,7 +29,7 @@ class Server @Inject() (lifecycle: ApplicationLifecycle, discussionServiceRegist
 
   Regions.start
 
-  Projections.start(Seq(discussionServiceRegistry.discussionProjection))
+  discussionServiceRegistry.discussionProjectionUpdater.startProjection(discussionServiceRegistry.discussionProjection.update)
 }
 
 trait ServerInterface

@@ -3,9 +3,13 @@ package registry
 import javax.inject.Inject
 
 import akka.actor.ActorSystem
+import akka.persistence.query.PersistenceQuery
+import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
+import akka.persistence.query.scaladsl.{ EventsByTagQuery, ReadJournal }
 import com.google.inject.ImplementedBy
 import nv.common.ddd.application.RegionCommandService
 import nv.common.ddd.infrastructure.dao.ProjectionProgressesDao
+import nv.common.ddd.infrastructure.projection.{ ResumableProjectionUpdater, ResumableProjectionUpdaterSlick }
 import nv.common.ddd.infrastructure.{ DbConfig, IOExecutorSlick }
 import nv.discussion.application.{ DiscussionQueryService, DiscussionService }
 import nv.discussion.port.adapter.dao.{ CommentsDao, DiscussionsDao }
@@ -23,6 +27,7 @@ trait DiscussionServiceRegistry {
 
   val discussionProjection: DiscussionProjection
 
+  val discussionProjectionUpdater: ResumableProjectionUpdater
 }
 
 class DiscussionServiceRegistryImpl @Inject() (@NamedDatabase("discussion") dbConfigProvider: DatabaseConfigProvider, actorSystem: ActorSystem) extends DiscussionServiceRegistry {
@@ -49,5 +54,16 @@ class DiscussionServiceRegistryImpl @Inject() (@NamedDatabase("discussion") dbCo
 
   lazy val discussionQueryService: DiscussionQueryService = new DiscussionQueryService(discussionsDao, slickIo)
 
-  lazy val discussionProjection: DiscussionProjection = new DiscussionProjection(discussionUpdater, commentUpdater, ppDao, slickIo)
+  lazy val discussionProjection: DiscussionProjection = new DiscussionProjection(discussionUpdater, commentUpdater)
+
+  lazy val readJournal = PersistenceQuery(actorSystem)
+    .readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
+
+  val discussionProjectionUpdater = new ResumableProjectionUpdaterSlick {
+    override val projectionId: String = discussionProjection.projectionId
+    override val io: IOExecutorSlick = slickIo
+    override val pp: ProjectionProgressesDao = ppDao
+    override val readJournal: ReadJournal with EventsByTagQuery = PersistenceQuery(actorSystem)
+      .readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
+  }
 }
