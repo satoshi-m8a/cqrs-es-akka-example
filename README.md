@@ -24,8 +24,8 @@ CQRS+イベントソーシングのサンプルコードです。
  - サイト(nv-site)
  - ディスカッション(nv-discussion)  
  　CQRS+ESで実装
- - マーケット(nv-market)  
+ - マーケット(nv-market)
+ - 購入(nv-purchase)  
  　プロセスマネージャーをPersistentFSMで実装
- - 購入(nv-purchase)
  - 解析(nv-analysis)
 
