@@ -158,6 +158,9 @@ abstract class PurchaseProcessManager[T <: Seq[_]](val eventMediator: EventMedia
     case Event(CancelPointUseProcessed(), PurchaseProcessData(Some(r), sender, _, _, _)) ⇒
       sender.foreach(s ⇒ s ! PurchaseProcessCanceled(r.orderId, r.accountId))
       stop()
+    case Event(StateTimeout, PurchaseProcessData(Some(r), sender, _, _, _)) ⇒
+      sender.foreach(s ⇒ s ! PurchaseProcessCanceled(r.orderId, r.accountId))
+      stop()
   }
 
   when(PurchaseCompleted, 5.seconds) {

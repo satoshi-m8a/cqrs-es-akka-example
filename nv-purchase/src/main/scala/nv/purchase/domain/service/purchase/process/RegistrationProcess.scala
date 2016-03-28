@@ -21,7 +21,7 @@ trait RegistrationProcess {
       */
     case Event(OrderProcessed(), _) ⇒
       log.info("start registration process")
-      stay forMax 10.seconds andThen {
+      stay forMax 3.seconds andThen {
         case PurchaseProcessData(Some(r), _, true, true, false) ⇒
           productService.buy(r.items.map(_.id).toSeq, r.accountId).map {
             ids ⇒
@@ -33,7 +33,7 @@ trait RegistrationProcess {
       * 登録処理が完了したら、購入完了状態(PurchaseCompleted)へ遷移する。
       */
     case Event(BuyCompleted, _) ⇒
-      goto(PurchaseCompleted) applying RegistrationProcessed() forMax 5.seconds andThen {
+      goto(PurchaseCompleted) applying RegistrationProcessed() forMax 3.seconds andThen {
         case e ⇒
           self ! RegistrationProcessed()
       }
@@ -42,10 +42,7 @@ trait RegistrationProcess {
       * 登録処理のキャンセルが完了したら、オーダー処理(OrderProcessing)へ戻る。
       */
     case Event(CancelCompleted, _) ⇒
-      goto(OrderProcessing) applying CancelRegistrationProcessed() forMax 1.second andThen {
-        case e ⇒
-          self ! CancelRegistrationProcessed()
-      }
+      goto(OrderProcessing) applying CancelRegistrationProcessed()
 
     /**
       * タイムアウトが発生したら、 登録処理をキャンセルする。

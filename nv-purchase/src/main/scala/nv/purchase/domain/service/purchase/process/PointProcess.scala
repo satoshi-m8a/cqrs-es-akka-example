@@ -41,10 +41,7 @@ trait PointProcess {
       */
     case Event(PointWallet.Events.UsePointCanceled(_, _), _) ⇒
       log.info("handle point cancel")
-      goto(BeforeStart) applying CancelPointUseProcessed() andThen {
-        case e ⇒
-          self ! CancelPointUseProcessed()
-      }
+      goto(BeforeStart) applying CancelPointUseProcessed()
 
     /**
       * タイムアウトが発生したら、ポイントの利用をキャンセルする
