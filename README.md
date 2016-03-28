@@ -22,7 +22,10 @@ CQRS+イベントソーシングのサンプルコードです。
 各コンテキストの説明はそれぞれのサブプロジェクト内のREADMEを御覧ください。
  - アカウント(nv-account)
  - サイト(nv-site)
- - マーケット(nv-market)
+ - ディスカッション(nv-discussion)  
+ 　CQRS+ESで実装
+ - マーケット(nv-market)  
+ 　プロセスマネージャーをPersistentFSMで実装
  - 購入(nv-purchase)
  - 解析(nv-analysis)
 
