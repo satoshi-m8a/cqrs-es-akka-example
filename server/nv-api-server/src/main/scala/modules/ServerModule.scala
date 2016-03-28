@@ -29,8 +29,6 @@ class Server @Inject() (lifecycle: ApplicationLifecycle, discussionServiceRegist
   Regions.start
 
   Projections.start(Seq(discussionServiceRegistry.discussionProjection))
-
-  println("Start")
 }
 
 trait ServerInterface
