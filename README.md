@@ -18,3 +18,11 @@ CQRS+イベントソーシングのサンプルコードです。
  - コメント欄への書き込みは負荷分散とパフォーマンス向上、データ解析のためにCQRS+ES(Akka Persistence, Akka Persistence Query)を使っています。
  - 記事の購入(ポイントとの交換)にはプロセスマネージャー(PersistentFSM)を使っています。
 
+### コンテキスト
+各コンテキストの説明はそれぞれのサブプロジェクト内のREADMEを御覧ください。
+ - アカウント(nv-account)
+ - サイト(nv-site)
+ - マーケット(nv-market)
+ - 購入(nv-purchase)
+ - 解析(nv-analysis)
+
