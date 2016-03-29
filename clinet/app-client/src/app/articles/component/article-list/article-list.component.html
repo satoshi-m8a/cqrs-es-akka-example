@@ -1,0 +1,7 @@
+<h3>List</h3>
+
+<nv-pagination [maxItems]="12" [limit]="1" [currentPage]="currentPage" (selectPage)="changePage($event)"></nv-pagination>
+
+<ul class="list-group">
+    <li class="list-group-item" *ngFor="#article of articlesStore.articles">{{article.title}}</li>
+</ul>

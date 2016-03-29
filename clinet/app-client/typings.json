@@ -3,6 +3,9 @@
   "devDependencies": {},
   "ambientDependencies": {
     "es6-shim": "github:DefinitelyTyped/DefinitelyTyped/es6-shim/es6-shim.d.ts#6697d6f7dadbf5773cb40ecda35a76027e0783b2",
+    "immutable": "file:./node_modules/immutable/dist/immutable.d.ts",
+    "jasmine": "registry:dt/jasmine#2.2.0+20160317120654",
+    "redux": "registry:dt/redux#3.3.1+20160326112656",
     "systemjs": "github:DefinitelyTyped/DefinitelyTyped/systemjs/systemjs.d.ts#5c3e47967affa3c4128a3875d1664ba206ae1b0f",
     "zone.js": "github:DefinitelyTyped/DefinitelyTyped/zone.js/zone.js.d.ts#b923a5aaf013ac84c566f27ba6b5843211981c7a"
   }

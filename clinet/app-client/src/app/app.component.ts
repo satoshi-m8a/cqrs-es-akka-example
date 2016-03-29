@@ -11,5 +11,4 @@ import {CpComponent} from './cp/cp.component';
     {path: '/...', name: 'Cp', component: CpComponent}
 ])
 export class AppComponent {
-
 }
