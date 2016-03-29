@@ -45,8 +45,15 @@ trait AggregateRoot[S <: AggregateState[S, E], E <: DomainEvent] extends Persist
 
   type ReceiveEvent = PartialFunction[E, Unit]
 
+  /**
+    * アクターを停止させるデフォルトの時間
+    *
+    */
   val receiveTimeout = 120 seconds
 
+  /**
+    * デフォルトのスナップショット間隔
+    */
   val snapShotPeriod = 50
 
   context.setReceiveTimeout(receiveTimeout)

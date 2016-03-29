@@ -71,13 +71,6 @@ class Discussion extends AggregateRoot[DiscussionState, DiscussionEvent] {
         sender() ! akka.actor.Status.Failure(AnonymousCommentNotAllowed)
       }
   }
-
-  override def afterEvent: ReceiveEvent = {
-    case evt: DiscussionCreated ⇒ {
-      //noop
-    }
-  }
-
 }
 
 case class DiscussionState(title: String, allowAnonymous: Boolean, numOfComments: Long) extends AggregateState[DiscussionState, DiscussionEvent] {
