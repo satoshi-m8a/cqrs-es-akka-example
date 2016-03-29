@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.{ ActorLogging, Props }
 import nv.common.ddd.domain._
-import nv.purchase.domain.model.order.Order.Commands.PlaceOrder
+import nv.purchase.domain.model.order.Order.Commands.{ CancelOrder, PlaceOrder }
 import nv.purchase.domain.model.order.Order.Events.{ OrderCanceled, OrderEvent, OrderPlaced }
 
 import scala.reflect._
@@ -42,22 +42,27 @@ class Order extends AggregateRoot[OrderState, OrderEvent] with ActorLogging {
 
   override val aggregateStateClassTag: ClassTag[OrderState] = classTag[OrderState]
 
-  override def initialState: OrderState = OrderState(Set.empty)
+  override def initialState: OrderState = OrderState(Set.empty, placed = false)
 
   override def handleCommand: Receive = {
-    case cmd: PlaceOrder ⇒ {
+    case cmd: PlaceOrder ⇒
       log.info("handle place order command")
       raise(OrderPlaced(cmd.id, cmd.items))
-    }
+    case cmd: CancelOrder ⇒
+      if (state.placed) {
+        raise(OrderCanceled(cmd.id))
+      } else {
+        sender() ! OrderCanceled(cmd.id)
+      }
   }
 
 }
 
-case class OrderState(items: Set[Item]) extends AggregateState[OrderState, OrderEvent] {
+case class OrderState(items: Set[Item], placed: Boolean) extends AggregateState[OrderState, OrderEvent] {
   override def handle: HandleState = {
     case evt: OrderPlaced ⇒
-      copy(items = evt.items)
+      copy(items = evt.items, placed = true)
     case evt: OrderCanceled ⇒
-      this
+      copy(placed = false)
   }
 }
