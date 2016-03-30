@@ -3,8 +3,8 @@ package registry
 import javax.inject.Inject
 
 import akka.actor.ActorSystem
+import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.PersistenceQuery
-import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
 import akka.persistence.query.scaladsl.{ EventsByTagQuery, ReadJournal }
 import com.google.inject.ImplementedBy
 import nv.analysis.application.WordCountService
@@ -35,7 +35,7 @@ class AnalysisServiceRegistryImpl @Inject() (@NamedDatabase("analysis") dbConfig
     override val pp: ProjectionProgressesDao = ppDao
     override val io: IOExecutorSlick = slickIo
     override val readJournal: ReadJournal with EventsByTagQuery = PersistenceQuery(actorSystem)
-      .readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
+      .readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
     override val projectionId: String = "Discussion"
   }
   val wordCountService: WordCountService = new WordCountService

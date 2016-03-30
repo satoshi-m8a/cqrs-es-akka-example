@@ -2,14 +2,12 @@ package nv.analysis.infrastructure.pump
 
 import akka.actor._
 import akka.cluster.singleton.{ ClusterSingletonManager, ClusterSingletonManagerSettings, ClusterSingletonProxy, ClusterSingletonProxySettings }
-import akka.pattern.ask
 import akka.util.Timeout
 import nv.analysis.application.WordCountService
 import nv.analysis.infrastructure.pump.DiscussionEventPump.Start
 import nv.common.ddd.infrastructure.projection.ResumableProjectionUpdater
 import nv.discussion.domain.model.discussion.Discussion.Events.CommentAdded
 
-import scala.concurrent.Future
 import scala.concurrent.duration._
 
 object DiscussionEventPump {
@@ -42,12 +40,7 @@ class DiscussionEventPump(wordCountService: WordCountService, projectionUpdater:
       import context.dispatcher
       projectionUpdater.startProjection {
         case evt: CommentAdded ⇒
-          self ? evt
+          wordCountService.count(evt.comment.text)
       }
-    case evt: CommentAdded ⇒
-      import context.dispatcher
-      val replyTo = sender()
-      wordCountService.count(evt.comment.text).map { e ⇒ replyTo ! e }
-
   }
 }

@@ -25,7 +25,7 @@ class Server @Inject() (lifecycle: ApplicationLifecycle, serviceRegistry: Analys
     system.terminate
   })
 
-  system.actorOf(DiscussionEventPump.props(serviceRegistry.wordCountService, serviceRegistry.pump))
+  system.actorOf(DiscussionEventPump.props(serviceRegistry.wordCountService, serviceRegistry.pump), name = "DiscussionPump")
 
 }
 
