@@ -10,7 +10,7 @@ import scala.concurrent.duration._
 import akka.pattern.ask
 
 trait CommandService {
-  val defaultTimeout = 5 seconds
+  val defaultTimeout = 60 seconds
   val recipient: ActorRef
 
   def send[T <: EntityId[_]](command: Command[T], t: Timeout = Timeout(defaultTimeout)): Future[Any] = recipient.ask(command)(t)

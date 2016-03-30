@@ -1,11 +1,12 @@
+import com.typesafe.sbt.SbtScalariform
+import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import play.sbt.PlayImport._
 import play.sbt.{PlayLayoutPlugin, PlayScala}
 import sbt.Keys._
 import sbt._
 import sbtprotobuf.{ProtobufPlugin => PB}
+
 import scalariform.formatter.preferences._
-import com.typesafe.sbt.SbtScalariform
-import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 
 object Build extends sbt.Build {
 
@@ -39,13 +40,26 @@ object Build extends sbt.Build {
       "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test")
   )
 
+  val playCommonSettings = Seq(
+    libraryDependencies ++= Seq(
+      cache,
+      ws,
+      filters,
+      "com.typesafe.play" %% "play-slick" % "2.0.0",
+      "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
+      "com.h2database" % "h2" % "1.4.191",
+      "com.typesafe.akka" %% "akka-persistence-cassandra" % "0.11",
+      "com.typesafe.akka" %% "akka-distributed-data-experimental" % akkaVersion
+    )
+  )
+
   lazy val root = Project(
     id = "nv-cms",
     base = file("."),
     settings = commonSettings ++ commonDependencies
   )
     .aggregate(common, apiServer, site, discussion, account, market, purchase, analysis, buildServer, testkit)
-    .dependsOn(apiServer)
+    .dependsOn(apiServer, analysisServer)
 
   // onLoad in Global := (Command.process("project nv-server", _: State)) compose (onLoad in Global).value
 
@@ -112,17 +126,16 @@ object Build extends sbt.Build {
   lazy val apiServer = Project(
     id = "nv-api-server",
     base = file("server/nv-api-server"),
-    settings = commonSettings ++ commonDependencies ++ Seq(
-      libraryDependencies ++= Seq(
-        cache,
-        ws,
-        filters,
-        "com.typesafe.play" %% "play-slick" % "2.0.0",
-        "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
-        "com.h2database" % "h2" % "1.4.191"
-      )
-    )
+    settings = commonSettings ++ commonDependencies ++ playCommonSettings
   ).enablePlugins(PlayScala)
     .disablePlugins(PlayLayoutPlugin)
     .dependsOn(common, site, discussion, account, purchase)
+
+  lazy val analysisServer = Project(
+    id = "nv-analysis-server",
+    base = file("server/nv-analysis-server"),
+    settings = commonSettings ++ commonDependencies ++ playCommonSettings
+  ).enablePlugins(PlayScala)
+    .disablePlugins(PlayLayoutPlugin)
+    .dependsOn(common, site, discussion, account, purchase, analysis)
 }

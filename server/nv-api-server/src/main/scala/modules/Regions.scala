@@ -11,7 +11,7 @@ object Regions {
     case c: Command[_] ⇒ (c.id.value.toString, c)
   }
 
-  val numberOfShards = 100
+  val numberOfShards = 20
 
   val extractShardId: ShardRegion.ExtractShardId = {
     case c: Command[_] ⇒ (Math.abs(c.id.value.toString.hashCode) % numberOfShards).toString

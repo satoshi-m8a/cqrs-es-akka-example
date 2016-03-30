@@ -3,6 +3,7 @@ package registry
 import javax.inject.Inject
 
 import akka.actor.ActorSystem
+import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.PersistenceQuery
 import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
 import akka.persistence.query.scaladsl.{ EventsByTagQuery, ReadJournal }
@@ -48,7 +49,7 @@ class DiscussionServiceRegistryImpl @Inject() (@NamedDatabase("discussion") dbCo
 
   val commentUpdater = new CommentUpdater(commentsDao, slickIo)
 
-  val discussionCommandService = new RegionCommandService("Discussion")(actorSystem)
+  lazy val discussionCommandService = new RegionCommandService("Discussion")(actorSystem)
 
   lazy val discussionService: DiscussionService = new DiscussionService(discussionCommandService)
 
@@ -56,14 +57,11 @@ class DiscussionServiceRegistryImpl @Inject() (@NamedDatabase("discussion") dbCo
 
   lazy val discussionProjection: DiscussionProjection = new DiscussionProjection(discussionUpdater, commentUpdater)
 
-  lazy val readJournal = PersistenceQuery(actorSystem)
-    .readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
-
   val discussionProjectionUpdater = new ResumableProjectionUpdaterSlick {
     override val projectionId: String = discussionProjection.projectionId
     override val io: IOExecutorSlick = slickIo
     override val pp: ProjectionProgressesDao = ppDao
     override val readJournal: ReadJournal with EventsByTagQuery = PersistenceQuery(actorSystem)
-      .readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
+      .readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
   }
 }
