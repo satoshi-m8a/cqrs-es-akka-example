@@ -24,7 +24,7 @@ object Regions {
     /**
       *  指定のロールのときだけ、ShardRegionを立ち上げる、それ以外の場合はプロキシを立ち上げる。
       */
-    if (roles.contains("write-backend")) {
+    if (roles.contains("discussion-command-backend")) {
       ClusterSharding(system).start(
         typeName = "Discussion",
         entityProps = Discussion.props,
