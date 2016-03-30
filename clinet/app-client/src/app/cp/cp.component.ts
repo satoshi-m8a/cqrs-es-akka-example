@@ -15,7 +15,7 @@ import {DiscussionsComponent} from '../discussions/view/discussions.component';
     {path: '', name: 'Dashboard', component: DashboardComponent, useAsDefault: true},
     {path: 'sites', name: 'Sites', component: SitesComponent},
     {path: 'articles', name: 'Articles', component: ArticlesComponent},
-    {path: 'discussions', name: 'Discussions', component: DiscussionsComponent}
+    {path: 'discussions/...', name: 'Discussions', component: DiscussionsComponent}
 ])
 export class CpComponent {
 

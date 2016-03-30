@@ -75,7 +75,7 @@ export class PaginationComponent implements OnInit {
             e = totalPageNum;
         }
 
-        let list = [];
+        let list:number[] = [];
         for (let i = s; i <= e; i++) {
             list.push(i);
         }

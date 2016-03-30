@@ -79,9 +79,9 @@ gulp.task('configure:prod', function () {
 gulp.task('template', ['config-template', 'main-template']);
 
 gulp.task('config-template', function () {
-    return gulp.src(SRC + '/config.tpl.ts')
+    return gulp.src(SRC + '/app/config.tpl.ts')
         .pipe(template(config))
-        .pipe(rename('config.ts'))
+        .pipe(rename('app/config.ts'))
         .pipe(gulp.dest(SRC));
 });
 

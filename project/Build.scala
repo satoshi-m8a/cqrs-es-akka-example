@@ -1,3 +1,4 @@
+import play.sbt.PlayImport._
 import play.sbt.{PlayLayoutPlugin, PlayScala}
 import sbt.Keys._
 import sbt._
@@ -113,6 +114,9 @@ object Build extends sbt.Build {
     base = file("server/nv-api-server"),
     settings = commonSettings ++ commonDependencies ++ Seq(
       libraryDependencies ++= Seq(
+        cache,
+        ws,
+        filters,
         "com.typesafe.play" %% "play-slick" % "2.0.0",
         "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
         "com.h2database" % "h2" % "1.4.191"
@@ -121,5 +125,4 @@ object Build extends sbt.Build {
   ).enablePlugins(PlayScala)
     .disablePlugins(PlayLayoutPlugin)
     .dependsOn(common, site, discussion, account, purchase)
-
 }

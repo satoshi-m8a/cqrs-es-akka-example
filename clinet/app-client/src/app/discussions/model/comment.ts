@@ -1,4 +1,4 @@
 export class Comment {
-    constructor(public id:number, text:string) {
+    constructor(public id:number, public text:string) {
     }
 }
