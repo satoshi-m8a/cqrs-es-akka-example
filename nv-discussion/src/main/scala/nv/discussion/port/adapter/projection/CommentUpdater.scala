@@ -2,7 +2,7 @@ package nv.discussion.port.adapter.projection
 
 import nv.common.ddd.infrastructure.IOExecutorSlick
 import nv.common.ddd.infrastructure.projection.ReadModelUpdater
-import nv.discussion.domain.model.discussion.Discussion.Events.{ CommentEdited, CommentAdded, DiscussionEvent }
+import nv.discussion.domain.model.discussion.Discussion.Events.{ CommentAdded, CommentDeleted, CommentEdited, DiscussionEvent }
 import nv.discussion.port.adapter.dao.CommentsDao
 import nv.discussion.port.adapter.dto.CommentDto
 
@@ -14,6 +14,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class CommentUpdater(commentsDao: CommentsDao, io: IOExecutorSlick) extends ReadModelUpdater {
   def transformDto(dto: Option[CommentDto], event: DiscussionEvent): CommentDto = event match {
     case e: CommentAdded ⇒
+      CommentDto(e.id, e.commentId, e.comment.text, e.comment.by)
+    case e: CommentEdited ⇒
       CommentDto(e.id, e.commentId, e.comment.text, e.comment.by)
     case _ ⇒
       throw new IllegalArgumentException("Unhandled Event " + event)
@@ -30,5 +32,7 @@ class CommentUpdater(commentsDao: CommentsDao, io: IOExecutorSlick) extends Read
       insertOrUpdate(transformDto(None, e))
     case e: CommentEdited ⇒
       insertOrUpdate(transformDto(None, e))
+    case e: CommentDeleted ⇒
+      io.run(commentsDao.delete(e.id, e.commentId))
   }
 }

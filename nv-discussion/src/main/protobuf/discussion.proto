@@ -16,3 +16,16 @@ message CommentAdded {
     required string text = 3;
     required string comment_by = 4;
 }
+
+message CommentEdited {
+    required string id = 1;
+    required int64 comment_id = 2;
+    required string text = 3;
+    required string comment_by = 4;
+}
+
+message CommentDeleted {
+    required string id = 1;
+    required int64 comment_id = 2;
+    required string by = 3;
+}

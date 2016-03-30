@@ -2,14 +2,14 @@ package nv.discussion.port.adapter.projection
 
 import akka.persistence.query.PersistenceQuery
 import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
-import akka.persistence.query.scaladsl.{EventsByTagQuery, ReadJournal}
+import akka.persistence.query.scaladsl.{ EventsByTagQuery, ReadJournal }
 import akka.util.Timeout
 import nv.common.ddd.infrastructure.dao.ProjectionProgressesDao
 import nv.common.ddd.infrastructure.projection.ResumableProjectionUpdaterSlick
-import nv.common.ddd.infrastructure.{DbConfig, IOExecutorSlick}
+import nv.common.ddd.infrastructure.{ DbConfig, IOExecutorSlick }
 import nv.discussion.domain.model.discussion.Discussion.Commands.CreateDiscussion
-import nv.discussion.domain.model.discussion.{Discussion, DiscussionId}
-import nv.discussion.port.adapter.dao.{CommentsDao, DiscussionsDao}
+import nv.discussion.domain.model.discussion.{ Discussion, DiscussionId }
+import nv.discussion.port.adapter.dao.{ CommentsDao, DiscussionsDao }
 import nv.testkit.persistent.DbSpecSupport
 import nv.testkit.support.TestSupport
 

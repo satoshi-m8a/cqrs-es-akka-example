@@ -1,7 +1,7 @@
 package nv.discussion.port.adapter.dao
 
 import nv.account.domain.model.account.AccountId
-import nv.account.infrastructure.dao.{ AccountsDao, DefaultMappers ⇒ AccountDefaultMappers }
+import nv.account.infrastructure.dao.{ DefaultMappers ⇒ AccountDefaultMappers }
 import nv.common.ddd.infrastructure.{ DaoHelpers, DbConfig }
 import nv.discussion.domain.model.discussion.DiscussionId
 import nv.discussion.port.adapter.dto.CommentDto
@@ -33,6 +33,11 @@ class CommentsDao(val dbConfig: DbConfig, val discussionsDao: DiscussionsDao) ex
 
   def insertOrUpdate(dto: CommentDto)(implicit ec: ExecutionContext): DBIO[CommentDto] = {
     comments.insertOrUpdate(dto).map(_ ⇒ dto)
+  }
+
+  def delete(id: DiscussionId, commentId: Long)(implicit ec: ExecutionContext): DBIO[(DiscussionId, Long)] = {
+    val q = comments.filter(c ⇒ c.discussionId === id && c.commentId === commentId)
+    q.delete.map(_ ⇒ (id, commentId))
   }
 
 }
