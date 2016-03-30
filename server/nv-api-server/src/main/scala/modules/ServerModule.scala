@@ -29,7 +29,13 @@ class Server @Inject() (lifecycle: ApplicationLifecycle, discussionServiceRegist
 
   Regions.start
 
-  discussionServiceRegistry.discussionProjectionUpdater.startProjection(discussionServiceRegistry.discussionProjection.update)
+  /**
+    * 指定のロールのときだけ、プロジェクションを立ち上げる。
+    */
+  val roles = system.settings.config.getStringList("akka.cluster.roles")
+  if (roles.contains("discussion-projection")) {
+    discussionServiceRegistry.discussionProjectionUpdater.startProjection(discussionServiceRegistry.discussionProjection.update)
+  }
 }
 
 trait ServerInterface

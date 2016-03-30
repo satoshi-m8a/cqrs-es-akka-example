@@ -1,5 +1,7 @@
 /RUNNING_PID
 /logs/
+/server/nv-api-server/logs/
+/server/nv-build-server/logs/
 /project/*-shim.sbt
 /project/project/
 /project/target/

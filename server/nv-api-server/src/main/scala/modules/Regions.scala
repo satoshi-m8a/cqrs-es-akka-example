@@ -17,20 +17,23 @@ object Regions {
     case c: Command[_] ⇒ (Math.abs(c.id.value.toString.hashCode) % numberOfShards).toString
   }
 
-  val regions = Map(
-    "Discussion" → Discussion.props
-  )
-
   def start(implicit system: ActorSystem) = {
-    regions.foreach {
-      case (name, props) ⇒
-        ClusterSharding(system).start(
-          typeName = name,
-          entityProps = props,
-          settings = ClusterShardingSettings(system),
-          extractEntityId = extractEntityId,
-          extractShardId = extractShardId
-        )
+
+    val roles = system.settings.config.getStringList("akka.cluster.roles")
+
+    /**
+      *  指定のロールのときだけ、ShardRegionを立ち上げる、それ以外の場合はプロキシを立ち上げる。
+      */
+    if (roles.contains("write-backend")) {
+      ClusterSharding(system).start(
+        typeName = "Discussion",
+        entityProps = Discussion.props,
+        settings = ClusterShardingSettings(system),
+        extractEntityId = extractEntityId,
+        extractShardId = extractShardId
+      )
+    } else {
+      ClusterSharding(system).startProxy(typeName = "Discussion", None, extractEntityId, extractShardId)
     }
   }
 }
