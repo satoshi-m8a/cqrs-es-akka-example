@@ -2,19 +2,24 @@ package nv.discussion.application
 
 import nv.common.ddd.infrastructure.IOExecutorSlick
 import nv.discussion.domain.model.discussion.DiscussionId
-import nv.discussion.port.adapter.dao.DiscussionsDao
-import nv.discussion.port.adapter.dto.DiscussionDto
+import nv.discussion.port.adapter.dao.{ CommentsDao, DiscussionsDao }
+import nv.discussion.port.adapter.dto.{ CommentDto, DiscussionDto }
 
 import scala.concurrent.Future
+
 //TODO
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class DiscussionQueryService(discussionsDao: DiscussionsDao, io: IOExecutorSlick) {
+class DiscussionQueryService(discussionsDao: DiscussionsDao, commentsDao: CommentsDao, io: IOExecutorSlick) {
 
   def findById(id: DiscussionId): Future[Option[DiscussionDto]] = {
     io.run {
       discussionsDao.findById(id)
     }
+  }
+
+  def findAllCommentsBy(id: DiscussionId): Future[Seq[CommentDto]] = {
+    io.run(commentsDao.findAllBy(id))
   }
 
 }

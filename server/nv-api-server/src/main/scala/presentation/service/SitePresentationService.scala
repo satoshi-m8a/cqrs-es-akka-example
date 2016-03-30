@@ -4,7 +4,7 @@ import javax.inject.Inject
 import nv.account.domain.model.account.AccountId
 import nv.site.domain.model.site.SiteId
 import nv.site.infrastructure.dao.SiteDto
-import presentation.model.site.{ ErrorResponse, CreateSiteRequest, Site }
+import presentation.model.site.{ ErrorResponse, CreateSiteRequest, SitePm }
 import registry.SiteServiceRegistry
 
 import scala.concurrent.Future
@@ -20,14 +20,14 @@ class SitePresentationService @Inject() (registry: SiteServiceRegistry) {
     AccountId(value)
   }
 
-  implicit def siteDtoToSite(dto: SiteDto): Site = {
-    Site(dto.id, dto.name)
+  implicit def siteDtoToSite(dto: SiteDto): SitePm = {
+    SitePm(dto.id, dto.name)
   }
 
-  def createSite(request: CreateSiteRequest): Future[Either[ErrorResponse, Site]] = {
+  def createSite(request: CreateSiteRequest): Future[Either[ErrorResponse, SitePm]] = {
     registry.siteService.createSite(request.name, request.accountId).map {
       evt ⇒
-        Right(Site(evt.id, evt.name))
+        Right(SitePm(evt.id, evt.name))
     }.recover {
       //TODO
       case e: Throwable ⇒
@@ -35,7 +35,7 @@ class SitePresentationService @Inject() (registry: SiteServiceRegistry) {
     }
   }
 
-  def findById(id: SiteId): Future[Option[Site]] = {
+  def findById(id: SiteId): Future[Option[SitePm]] = {
     registry.siteQueryService.findById(id).map {
       case Some(dto) ⇒
         Some(dto)

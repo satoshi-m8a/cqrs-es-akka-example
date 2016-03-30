@@ -2,10 +2,11 @@ package controllers
 
 import javax.inject.Inject
 
+import nv.discussion.domain.model.discussion.Discussion.Exceptions.AnonymousCommentNotAllowed
 import nv.discussion.domain.model.discussion.DiscussionId
 import play.api.libs.json.Json
 import play.api.mvc.{ Action, Controller }
-import presentation.model.discussion.CreateDiscussionRequest
+import presentation.model.discussion.{ AddCommentRequest, CreateDiscussionRequest }
 import presentation.service.DiscussionPresentationService
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,5 +36,31 @@ class DiscussionApi @Inject() (discussionPresentationService: DiscussionPresenta
       case _ ⇒
         NotFound("not found")
     }
+  }
+
+  def addComment(id: String) = Action.async(parse.json) {
+    request ⇒
+      request.body.validate[AddCommentRequest].map {
+        req ⇒
+          discussionPresentationService.addComment(DiscussionId(id), req).map {
+            comment ⇒
+              Ok(Json.toJson(comment))
+          }.recover {
+            case AnonymousCommentNotAllowed ⇒
+              BadRequest("")
+          }
+
+      }.recoverTotal {
+        case e ⇒
+          Future.successful(BadRequest(""))
+      }
+  }
+
+  def getComments(id: String) = Action.async {
+    request ⇒
+      discussionPresentationService.getComments(DiscussionId(id)).map {
+        comments ⇒
+          Ok(Json.toJson(comments))
+      }
   }
 }

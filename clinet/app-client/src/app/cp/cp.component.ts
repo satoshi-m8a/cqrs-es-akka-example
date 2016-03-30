@@ -5,6 +5,7 @@ import {ROUTER_DIRECTIVES} from 'angular2/router';
 import {HeaderComponent} from './component/header/header.component';
 import {DashboardComponent} from '../dashboard/view/dashboard.component';
 import {ArticlesComponent} from '../articles/view/articles.component';
+import {DiscussionsComponent} from '../discussions/view/discussions.component';
 @Component({
     templateUrl: 'app/cp/cp.component.html',
     styleUrls: ['app/cp/cp.component.css'],
@@ -13,7 +14,8 @@ import {ArticlesComponent} from '../articles/view/articles.component';
 @RouteConfig([
     {path: '', name: 'Dashboard', component: DashboardComponent, useAsDefault: true},
     {path: 'sites', name: 'Sites', component: SitesComponent},
-    {path: 'articles', name: 'Articles', component: ArticlesComponent}
+    {path: 'articles', name: 'Articles', component: ArticlesComponent},
+    {path: 'discussions', name: 'Discussions', component: DiscussionsComponent}
 ])
 export class CpComponent {
 

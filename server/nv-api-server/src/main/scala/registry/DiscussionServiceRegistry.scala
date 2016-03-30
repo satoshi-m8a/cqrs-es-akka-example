@@ -52,7 +52,7 @@ class DiscussionServiceRegistryImpl @Inject() (@NamedDatabase("discussion") dbCo
 
   lazy val discussionService: DiscussionService = new DiscussionService(discussionCommandService)
 
-  lazy val discussionQueryService: DiscussionQueryService = new DiscussionQueryService(discussionsDao, slickIo)
+  lazy val discussionQueryService: DiscussionQueryService = new DiscussionQueryService(discussionsDao, commentsDao, slickIo)
 
   lazy val discussionProjection: DiscussionProjection = new DiscussionProjection(discussionUpdater, commentUpdater)
 

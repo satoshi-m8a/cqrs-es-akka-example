@@ -5,7 +5,7 @@ import javax.inject.Inject
 import nv.account.domain.model.account.AccountId
 import nv.site.domain.model.site.SiteId
 import play.api.libs.json.Json
-import presentation.model.site.{ Site, ErrorResponse, CreateSiteRequest }
+import presentation.model.site.{ SitePm$, ErrorResponse, CreateSiteRequest }
 import presentation.service.SitePresentationService
 import registry.SiteServiceRegistry
 import nv.site.application.SiteQueryService

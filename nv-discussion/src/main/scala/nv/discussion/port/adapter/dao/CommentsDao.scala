@@ -35,6 +35,10 @@ class CommentsDao(val dbConfig: DbConfig, val discussionsDao: DiscussionsDao) ex
     comments.insertOrUpdate(dto).map(_ ⇒ dto)
   }
 
+  def findAllBy(id: DiscussionId)(implicit ec: ExecutionContext): DBIO[Seq[CommentDto]] = {
+    comments.filter(_.discussionId === id).sortBy(_.commentId).result
+  }
+
   def delete(id: DiscussionId, commentId: Long)(implicit ec: ExecutionContext): DBIO[(DiscussionId, Long)] = {
     val q = comments.filter(c ⇒ c.discussionId === id && c.commentId === commentId)
     q.delete.map(_ ⇒ (id, commentId))

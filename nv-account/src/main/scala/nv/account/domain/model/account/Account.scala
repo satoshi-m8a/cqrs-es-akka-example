@@ -6,6 +6,4 @@ object Account {
   def nextId: AccountId = AccountId(UUID.randomUUID().toString)
 }
 
-class Account {
-
-}
+case class Account(id: AccountId, displayName: String)
