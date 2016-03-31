@@ -1,9 +1,9 @@
 package nv.discussion.application
 
 import nv.common.ddd.application.CommandService
-import nv.discussion.domain.model.discussion.{ Comment, DiscussionId, Discussion }
 import nv.discussion.domain.model.discussion.Discussion.Commands.{ AddComment, CreateDiscussion }
 import nv.discussion.domain.model.discussion.Discussion.Events.{ CommentAdded, DiscussionCreated }
+import nv.discussion.domain.model.discussion.{ Comment, Discussion, DiscussionId }
 
 import scala.concurrent.Future
 

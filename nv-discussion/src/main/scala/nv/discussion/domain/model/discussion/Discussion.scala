@@ -5,7 +5,7 @@ import java.util.UUID
 import akka.actor.Props
 import nv.account.domain.model.account.AccountId
 import nv.common.ddd.domain.{ AggregateRoot, AggregateState, Command, DomainEvent }
-import nv.discussion.domain.model.discussion.Discussion.Commands.{ AddComment, CreateDiscussion, DeleteComment, EditComment }
+import nv.discussion.domain.model.discussion.Discussion.Commands._
 import nv.discussion.domain.model.discussion.Discussion.Events._
 import nv.discussion.domain.model.discussion.Discussion.Exceptions.{ AnonymousCommentNotAllowed, DeleteNotAllowed, EditNotAllowed }
 
@@ -17,6 +17,9 @@ object Discussion {
 
   def nextId: DiscussionId = DiscussionId(UUID.randomUUID().toString)
 
+  /**
+    *
+    */
   object Commands {
 
     sealed trait DiscussionCommand extends Command[DiscussionId]
@@ -28,6 +31,14 @@ object Discussion {
     case class EditComment(id: DiscussionId, commentId: Long, comment: Comment) extends DiscussionCommand
 
     case class DeleteComment(id: DiscussionId, commentId: Long, by: AccountId) extends DiscussionCommand
+
+    /**
+      * 失敗例、シリアライザとイベントアダプタで対処したらこれは消して良い
+      *
+      * @see nv.discussion.port.adapter.serializer.DiscussionSerializerWithProtobuf
+      * @param id
+      */
+    case class MissedCommand(id: DiscussionId) extends DiscussionCommand
 
   }
 
@@ -44,6 +55,14 @@ object Discussion {
     case class CommentEdited(id: DiscussionId, commentId: Long, comment: Comment) extends DiscussionEvent
 
     case class CommentDeleted(id: DiscussionId, commentId: Long, by: AccountId) extends DiscussionEvent
+
+    /**
+      * 失敗例、シリアライザとイベントアダプタで対処したらこれは消して良い
+      *
+      * @see nv.discussion.port.adapter.serializer.DiscussionSerializerWithProtobuf
+      * @param id
+      */
+    case class MissedEvent(id: DiscussionId) extends DiscussionEvent
 
   }
 
@@ -91,6 +110,14 @@ class Discussion extends AggregateRoot[DiscussionState, DiscussionEvent] {
       } else {
         sender() ! akka.actor.Status.Failure(DeleteNotAllowed)
       }
+
+    /**
+      * 失敗例、シリアライザとイベントアダプタで対処したらこれは消して良い
+      *
+      * @see nv.discussion.port.adapter.serializer.DiscussionSerializerWithProtobuf
+      */
+    case cmd: MissedCommand ⇒
+      raise(MissedEvent(cmd.id))
   }
 
 }

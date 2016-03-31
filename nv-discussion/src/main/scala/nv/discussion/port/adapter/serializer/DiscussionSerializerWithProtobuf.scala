@@ -2,8 +2,10 @@ package nv.discussion.port.adapter.serializer
 
 import akka.serialization.SerializerWithStringManifest
 import nv.account.domain.model.account.AccountId
-import nv.discussion.domain.model.discussion.Discussion.Events.{ CommentAdded, CommentDeleted, CommentEdited, DiscussionCreated }
+import nv.discussion.domain.model.discussion.Discussion.Events._
 import nv.discussion.domain.model.discussion.{ Comment, DiscussionId, DiscussionProtos }
+
+case object EventDeserializationSkipped
 
 class DiscussionSerializerWithProtobuf extends SerializerWithStringManifest {
   override def identifier: Int = 67876
@@ -16,10 +18,19 @@ class DiscussionSerializerWithProtobuf extends SerializerWithStringManifest {
 
   final val CommentDeletedManifest = classOf[CommentDeleted].getName
 
+  final val MissedEventManifest = classOf[MissedEvent].getName
+
+  //ここに不要なイベントを列記していく
+  val SkipEventManifestsEvents = Set(
+    "nv.discussion.domain.model.discussion.Discussion$Events$MissedEvent"
+  )
+
   override def manifest(o: AnyRef): String = o.getClass.getName
 
   override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef = {
     manifest match {
+      case m if SkipEventManifestsEvents.contains(m) ⇒
+        EventDeserializationSkipped
       case DiscussionCreatedManifest ⇒
         discussionCreated(DiscussionProtos.DiscussionCreated.parseFrom(bytes))
       case CommentAddedManifest ⇒
@@ -28,6 +39,8 @@ class DiscussionSerializerWithProtobuf extends SerializerWithStringManifest {
         commentEdited(DiscussionProtos.CommentEdited.parseFrom(bytes))
       case CommentDeletedManifest ⇒
         commentDeleted(DiscussionProtos.CommentDeleted.parseFrom(bytes))
+      case MissedEventManifest ⇒
+        missedEvent(DiscussionProtos.MissedEvent.parseFrom(bytes))
       case _ ⇒
         throw new IllegalArgumentException("Unable to handle manifest: " + manifest)
     }
@@ -60,6 +73,10 @@ class DiscussionSerializerWithProtobuf extends SerializerWithStringManifest {
         .setCommentId(s.commentId)
         .setBy(s.by.value)
         .build().toByteArray
+    case s: MissedEvent ⇒
+      DiscussionProtos.MissedEvent.newBuilder
+        .setId(s.id.value)
+        .build().toByteArray
   }
 
   private def discussionCreated(p: DiscussionProtos.DiscussionCreated): DiscussionCreated = {
@@ -86,6 +103,10 @@ class DiscussionSerializerWithProtobuf extends SerializerWithStringManifest {
 
   private def commentDeleted(p: DiscussionProtos.CommentDeleted): CommentDeleted = {
     CommentDeleted(DiscussionId(p.getId), p.getCommentId, AccountId(p.getBy))
+  }
+
+  private def missedEvent(p: DiscussionProtos.MissedEvent): MissedEvent = {
+    MissedEvent(DiscussionId(p.getId))
   }
 
 }

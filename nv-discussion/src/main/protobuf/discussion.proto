@@ -29,3 +29,7 @@ message CommentDeleted {
     required int64 comment_id = 2;
     required string by = 3;
 }
+
+message MissedEvent {
+    required string id = 1;
+}
