@@ -1,13 +1,13 @@
 package nv.common.ddd.application
 
-import akka.actor.{ ActorSystem, ActorRef }
-import akka.cluster.sharding.ClusterSharding
+import akka.actor.{ ActorRef, ActorSystem }
+import akka.cluster.sharding.{ ClusterSharding, ShardRegion }
+import akka.pattern.ask
 import akka.util.Timeout
 import nv.common.ddd.domain.{ Command, EntityId }
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import akka.pattern.ask
 
 trait CommandService {
   val defaultTimeout = 60 seconds
@@ -18,4 +18,8 @@ trait CommandService {
 
 class RegionCommandService(regionName: String)(implicit system: ActorSystem) extends CommandService {
   lazy val recipient: ActorRef = ClusterSharding(system).shardRegion(regionName)
+}
+
+class RegionCommandProxy(regionName: String, extractEntityId: ShardRegion.ExtractEntityId, extractShardId: ShardRegion.ExtractShardId)(implicit system: ActorSystem) extends CommandService {
+  lazy val recipient: ActorRef = ClusterSharding(system).startProxy(typeName = "Discussion", None, extractEntityId, extractShardId)
 }
