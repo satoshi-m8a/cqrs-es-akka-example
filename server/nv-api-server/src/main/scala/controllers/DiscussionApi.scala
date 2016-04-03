@@ -29,6 +29,13 @@ class DiscussionApi @Inject() (discussionPresentationService: DiscussionPresenta
       }
   }
 
+  def getDiscussions() = Action.async {
+    discussionPresentationService.findDiscussions().map {
+      discussions ⇒
+        Ok(Json.toJson(discussions))
+    }
+  }
+
   def getDiscussion(id: String) = Action.async {
     discussionPresentationService.findById(DiscussionId(id)).map {
       case Some(discussion) ⇒

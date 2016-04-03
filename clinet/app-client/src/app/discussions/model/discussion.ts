@@ -1,4 +1,4 @@
 export class Discussion {
-    constructor(public id:string, title:string) {
+    constructor(public id:string, public title:string) {
     }
 }

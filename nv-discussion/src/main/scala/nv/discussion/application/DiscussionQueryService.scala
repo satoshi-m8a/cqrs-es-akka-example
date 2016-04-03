@@ -18,6 +18,14 @@ class DiscussionQueryService(discussionsDao: DiscussionsDao, commentsDao: Commen
     }
   }
 
+  //TODO
+  def findDiscussions(): Future[Seq[DiscussionDto]] = {
+    import discussionsDao.dbConfig.driver.api._
+    io.run {
+      discussionsDao.discussions.result
+    }
+  }
+
   def findAllCommentsBy(id: DiscussionId): Future[Seq[CommentDto]] = {
     io.run(commentsDao.findAllBy(id))
   }

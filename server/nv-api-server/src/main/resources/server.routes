@@ -2,6 +2,7 @@ POST        /api/v1/sites                           @controllers.SiteApi.createS
 GET         /api/v1/sites/:id                       @controllers.SiteApi.getSite(id)
 
 POST        /api/v1/discussions                     @controllers.DiscussionApi.createDiscussion
+GET         /api/v1/discussions                     @controllers.DiscussionApi.getDiscussions
 GET         /api/v1/discussions/:id                 @controllers.DiscussionApi.getDiscussion(id)
 POST        /api/v1/discussions/:id/comments        @controllers.DiscussionApi.addComment(id)
 GET         /api/v1/discussions/:id/comments        @controllers.DiscussionApi.getComments(id)

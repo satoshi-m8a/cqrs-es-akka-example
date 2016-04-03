@@ -5,30 +5,20 @@
         <th>URL</th>
         <th>最終更新日</th>
         <th>最新記事</th>
-        <th><button class="btn btn-primary" [routerLink]="['DiscussionDetail',{id:'f7682087-26c4-4bd9-8995-f08410cd6870'}]" >View</button></th>
+        <th></th>
     </tr>
     </thead>
     <tbody>
-    <tr>
-        <td>Mark</td>
-        <td>http://google.com</td>
+    <tr *ngFor="#discussion of discussionsStore.discussions">
+        <td>{{discussion.id}}</td>
+        <td>{{discussion.title}}</td>
         <td>Otto</td>
         <td>@mdo</td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>Jacob</td>
-        <td>http://google.com</td>
-        <td>Thornton</td>
-        <td>@fat</td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>Larry</td>
-        <td>http://google.com</td>
-        <td>the Bird</td>
-        <td>@twitter</td>
-        <td></td>
+        <th>
+            <button class="btn btn-primary"
+                    [routerLink]="['DiscussionDetail',{id:discussion.id}]">View
+            </button>
+        </th>
     </tr>
     </tbody>
 </table>

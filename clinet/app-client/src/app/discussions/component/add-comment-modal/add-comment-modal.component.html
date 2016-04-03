@@ -1,0 +1,24 @@
+<div class="modal fade" [id]="modalId" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">{{modalTitle}}</h4>
+            </div>
+
+            <form (ngSubmit)="submit()" [ngFormModel]="form">
+                <div class="modal-body">
+                    <fieldset class="form-group">
+                        <textarea class="form-control" id="textarea"  rows="3" ngControl="text" [(ngModel)]="text"></textarea>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="dismiss()">Close</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="!form.valid || loading">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

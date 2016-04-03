@@ -28,6 +28,13 @@ class DiscussionPresentationService @Inject() (registry: DiscussionServiceRegist
     }
   }
 
+  def findDiscussions(): Future[Seq[DiscussionPm]] = {
+    registry.discussionQueryService.findDiscussions().map {
+      discussions ⇒
+        discussions.map(s ⇒ discussionDtoToDiscussion(s))
+    }
+  }
+
   def findById(discussionId: DiscussionId): Future[Option[DiscussionPm]] = {
     registry.discussionQueryService.findById(discussionId).map {
       case Some(dto) ⇒

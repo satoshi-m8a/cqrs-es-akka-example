@@ -1,3 +1,9 @@
 <h3>DiscussionDetail</h3>
 
+<button type="button" class="btn btn-primary pull-xs-right" (click)="onClickAddComment()">
+    Add Comment
+</button>
+
 <nv-comment-list></nv-comment-list>
+
+<nv-add-comment-modal [modalId]="discussionsStore.discussion.id" [discussionId]="discussionsStore.discussion.id"></nv-add-comment-modal>
