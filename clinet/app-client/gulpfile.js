@@ -54,12 +54,6 @@ var config = {
     "API_URL": ""
 };
 
-var files = function (list) {
-    return list.map(function (l) {
-        return l.replace(/.*\//, '');
-    });
-};
-
 var readConf = function (env) {
     return JSON.parse(fs.readFileSync('conf/' + env + '.conf.json').toString());
 };
