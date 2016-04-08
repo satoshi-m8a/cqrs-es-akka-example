@@ -1,14 +1,13 @@
 package nv.common.ddd.domain
 
-import akka.actor.{ ReceiveTimeout, ActorLogging }
+import akka.actor.{ActorLogging, ReceiveTimeout}
 import akka.cluster.sharding.ShardRegion.Passivate
-import akka.persistence.{ RecoveryCompleted, SnapshotOffer, PersistentActor }
-import nv.common.ddd.domain.AggregateRoot.Commands.{ SaveSnapshot, GetState, Stop }
-import nv.common.ddd.domain.AggregateRoot.Exceptions.{ StateNotInitialized, UnHandledCommandReceived }
-
-import scala.reflect.ClassTag
+import akka.persistence.{PersistentActor, RecoveryCompleted, SnapshotOffer}
+import nv.common.ddd.domain.AggregateRoot.Commands.{GetAggregateState, GetState, SaveSnapshot, Stop}
+import nv.common.ddd.domain.AggregateRoot.Exceptions.UnHandledCommandReceived
 
 import scala.concurrent.duration._
+import scala.reflect.ClassTag
 
 object AggregateRoot {
 
@@ -106,6 +105,7 @@ trait AggregateRoot[S <: AggregateState[S, E], E <: DomainEvent] extends Persist
     * 状態が更新された後に実行される。
     * 外部に対する振る舞い（Publish）などを実行する。
     * Recovery時は実行されない。
+    *
     * @return
     */
   def afterEvent: ReceiveEvent = {

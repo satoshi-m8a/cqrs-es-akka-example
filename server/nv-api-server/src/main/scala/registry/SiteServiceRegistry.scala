@@ -5,7 +5,7 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import nv.common.ddd.infrastructure.{ DbConfig, IOExecutorSlick }
 import nv.site.application.{ SiteQueryService, SiteService }
-import nv.site.infrastructure.dao.SitesDao
+import nv.site.infrastructure.dao.{ ArticlesDao, SitesDao }
 import nv.site.infrastructure.repository.SiteRepositorySlick
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
@@ -30,11 +30,13 @@ class SiteServiceRegistryImpl @Inject() (dbConfigProvider: DatabaseConfigProvide
 
   lazy val sitesDao = new SitesDao(dbConfig)
 
+  lazy val articlesDao = new ArticlesDao(dbConfig, sitesDao)
+
   lazy val slickIo = new IOExecutorSlick(dbConfig)
 
   lazy val siteRepository = new SiteRepositorySlick(dbConfig, sitesDao)
 
-  lazy val siteQueryService = new SiteQueryService(sitesDao, slickIo)
+  lazy val siteQueryService = new SiteQueryService(sitesDao, articlesDao, slickIo)
 
   lazy val siteService = new SiteService(siteRepository, slickIo)
 

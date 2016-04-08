@@ -8,7 +8,7 @@ import {CpComponent} from './cp/cp.component';
     directives: [ROUTER_DIRECTIVES]
 })
 @RouteConfig([
-    {path: '/...', name: 'Cp', component: CpComponent}
+    {path: ':sid/...', name: 'Cp', component: CpComponent}
 ])
 export class AppComponent {
 }

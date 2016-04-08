@@ -13,7 +13,7 @@ import {DiscussionsComponent} from '../discussions/view/discussions.component';
 })
 @RouteConfig([
     {path: '', name: 'Dashboard', component: DashboardComponent, useAsDefault: true},
-    {path: 'sites', name: 'Sites', component: SitesComponent},
+    {path: 'sites/...', name: 'Sites', component: SitesComponent},
     {path: 'articles', name: 'Articles', component: ArticlesComponent},
     {path: 'discussions/...', name: 'Discussions', component: DiscussionsComponent}
 ])

@@ -1,4 +1,4 @@
 export class Site {
-    constructor(public id:string, name:string) {
+    constructor(public id:string, public name:string) {
     }
 }

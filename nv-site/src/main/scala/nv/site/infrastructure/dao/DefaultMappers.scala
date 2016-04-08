@@ -1,6 +1,7 @@
 package nv.site.infrastructure.dao
 
 import nv.common.ddd.infrastructure.DbConfig
+import nv.site.domain.model.article.ArticleId
 import nv.site.domain.model.site.{ Role, SiteId }
 
 trait DefaultMappers {
@@ -17,5 +18,10 @@ trait DefaultMappers {
   implicit val siteIdMapper = MappedColumnType.base[SiteId, String](
     e ⇒ e.value,
     s ⇒ SiteId(s)
+  )
+
+  implicit val articleIdMapper = MappedColumnType.base[ArticleId, String](
+    e ⇒ e.value,
+    s ⇒ ArticleId(s)
   )
 }

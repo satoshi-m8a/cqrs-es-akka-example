@@ -6,6 +6,7 @@ import {Response} from 'angular2/http';
 import {Comment} from '../model/comment';
 import {Config} from '../../config';
 import {Headers} from 'angular2/http';
+import 'rxjs/add/operator/share';
 
 @Injectable()
 export class DiscussionsService {
@@ -18,7 +19,7 @@ export class DiscussionsService {
             return res.json().map((item:any)=> {
                 return new Discussion(item.id, item.title);
             });
-        });
+        }).share();
     }
 
     getDiscussion(id:string):Observable<Discussion> {
@@ -26,7 +27,7 @@ export class DiscussionsService {
         return this.http.get(this.config.API_URL + `/api/v1/discussions/${id}`).map((res:Response)=> {
             let item = res.json();
             return new Discussion(item.id, item.title);
-        });
+        }).share();
     }
 
     getComments(id:string):Observable<Array<Comment>> {
@@ -36,7 +37,7 @@ export class DiscussionsService {
             return res.json().map((d:any)=> {
                 return new Comment(d.id, d.text);
             });
-        });
+        }).share();
     }
 
     addComment(id:string, text:string):Observable<Comment> {
@@ -51,6 +52,6 @@ export class DiscussionsService {
         }).map((res:Response)=> {
             let item = res.json();
             return new Comment(item.id, item.text);
-        });
+        }).share();
     }
 }

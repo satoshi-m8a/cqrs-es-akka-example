@@ -1,11 +1,11 @@
 package nv.purchase.domain.model.pointwallet
 
-import akka.actor.{ ActorLogging, Props }
+import akka.actor.{ActorLogging, Props}
 import nv.account.domain.model.account.AccountId
 import nv.common.ddd.domain._
 import nv.purchase.domain.model.order.OrderId
-import nv.purchase.domain.model.pointwallet.PointWallet.Commands.{ CancelUsePoint, ChargePoint, UsePoint }
-import nv.purchase.domain.model.pointwallet.PointWallet.Events.{ PointCharged, PointUsed, PointWalletEvent, UsePointCanceled }
+import nv.purchase.domain.model.pointwallet.PointWallet.Commands.{CancelUsePoint, ChargePoint, GetCurrentPoint, UsePoint}
+import nv.purchase.domain.model.pointwallet.PointWallet.Events.{PointCharged, PointUsed, PointWalletEvent, UsePointCanceled}
 
 import scala.reflect._
 
@@ -25,6 +25,8 @@ object PointWallet {
     case class UsePoint(id: AccountId, orderId: OrderId, point: Long) extends PointWalletCommand
 
     case class CancelUsePoint(id: AccountId, orderId: OrderId) extends PointWalletCommand
+
+    case class GetCurrentPoint(id: AccountId) extends PointWalletCommand
 
   }
 
@@ -61,6 +63,9 @@ class PointWallet extends AggregateRoot[PointWalletState, PointWalletEvent] with
         //オーダーが見つからないかキャンセル済みであれば、キャンセル済みと返事する。
         sender() ! UsePointCanceled(cmd.id, cmd.orderId)
       }
+    case cmd: GetCurrentPoint ⇒
+      //現在のポイントを返すだけ、永続化などは行わない。
+      sender() ! state.currentPoint
   }
 
 }

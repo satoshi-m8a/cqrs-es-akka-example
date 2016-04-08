@@ -1,19 +1,25 @@
 package presentation.service
 
 import javax.inject.Inject
+
 import nv.account.domain.model.account.AccountId
+import nv.site.domain.model.article.ArticleId
 import nv.site.domain.model.site.SiteId
-import nv.site.infrastructure.dao.SiteDto
-import presentation.model.site.{ ErrorResponse, CreateSiteRequest, SitePm }
+import nv.site.infrastructure.dao.{ ArticleDto, SiteDto }
+import presentation.model.site.{ ArticlePm, CreateSiteRequest, ErrorResponse, SitePm }
 import registry.SiteServiceRegistry
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class SitePresentationService @Inject() (registry: SiteServiceRegistry) {
 
   implicit def siteIdToString(siteId: SiteId): String = {
     siteId.value
+  }
+
+  implicit def articleIdToString(articleId: ArticleId): String = {
+    articleId.value
   }
 
   implicit def stringToAccountId(value: String): AccountId = {
@@ -24,8 +30,13 @@ class SitePresentationService @Inject() (registry: SiteServiceRegistry) {
     SitePm(dto.id, dto.name)
   }
 
+  implicit def articleDtoToArticle(dto: ArticleDto): ArticlePm = {
+    ArticlePm(dto.id, dto.title)
+  }
+
   def createSite(request: CreateSiteRequest): Future[Either[ErrorResponse, SitePm]] = {
-    registry.siteService.createSite(request.name, request.accountId).map {
+    //TODO
+    registry.siteService.createSite(request.name, AccountId("todo")).map {
       evt ⇒
         Right(SitePm(evt.id, evt.name))
     }.recover {
@@ -41,6 +52,17 @@ class SitePresentationService @Inject() (registry: SiteServiceRegistry) {
         Some(dto)
       case _ ⇒
         None
+    }
+  }
+
+  def findSites(): Future[Seq[SitePm]] = {
+    registry.siteQueryService.findSites().map(_.map(siteDtoToSite))
+  }
+
+  def findArticles(id: SiteId): Future[Seq[ArticlePm]] = {
+    registry.siteQueryService.findArticles(id).map {
+      articles ⇒
+        articles.map(articleDtoToArticle)
     }
   }
 }

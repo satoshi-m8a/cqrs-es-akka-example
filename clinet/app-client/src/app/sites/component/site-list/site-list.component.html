@@ -1,0 +1,31 @@
+<table class="table">
+    <thead class="thead-inverse">
+
+    <tr>
+        <th>ID</th>
+        <th>サイト名</th>
+        <th>最終更新日</th>
+        <th>最新記事</th>
+        <th></th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="#item of list">
+        <td>{{item.id}}</td>
+        <td>{{item.name}}</td>
+        <td>Otto</td>
+        <td>@mdo</td>
+        <td>
+            <button class="btn btn-primary"
+                    [routerLink]="['SiteDetail',{id:item.id}]">Detail
+            </button>
+        </td>
+        <td>
+            <button class="btn btn-primary"
+                    (click)="switch(item)">Switch
+            </button>
+        </td>
+    </tr>
+    </tbody>
+</table>

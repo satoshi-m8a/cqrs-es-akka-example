@@ -1,5 +1,8 @@
 POST        /api/v1/sites                           @controllers.SiteApi.createSite
+GET         /api/v1/sites                           @controllers.SiteApi.getSites
 GET         /api/v1/sites/:id                       @controllers.SiteApi.getSite(id)
+
+GET         /api/v1/sites/:id/articles              @controllers.SiteApi.getArticles(id)
 
 POST        /api/v1/discussions                     @controllers.DiscussionApi.createDiscussion
 GET         /api/v1/discussions                     @controllers.DiscussionApi.getDiscussions

@@ -2,14 +2,12 @@ package controllers
 
 import javax.inject.Inject
 
-import nv.account.domain.model.account.AccountId
 import nv.site.domain.model.site.SiteId
 import play.api.libs.json.Json
-import presentation.model.site.{ SitePm$, ErrorResponse, CreateSiteRequest }
+import play.api.mvc.{ Action, Controller }
+import presentation.model.site.CreateSiteRequest
 import presentation.service.SitePresentationService
 import registry.SiteServiceRegistry
-import nv.site.application.SiteQueryService
-import play.api.mvc.{ Action, Controller }
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -32,14 +30,25 @@ class SiteApi @Inject() (registry: SiteServiceRegistry, sitePresentationService:
       }
   }
 
-  def getSite(id: String) = Action.async {
+  def getSites = Action.async {
+    sitePresentationService.findSites().map {
+      sites ⇒
+        Ok(Json.toJson(sites))
+    }
+  }
 
+  def getSite(id: String) = Action.async {
     sitePresentationService.findById(SiteId(id)).map {
       case Some(site) ⇒
         Ok(Json.toJson(site))
       case _ ⇒
         NotFound("not found")
     }
+  }
+
+  def getArticles(id: String) = Action.async {
+
+    Future.successful(Ok(""))
   }
 
 }

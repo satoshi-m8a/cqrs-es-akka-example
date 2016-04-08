@@ -1,20 +1,19 @@
 import {Component} from 'angular2/core';
-import {OnInit} from 'angular2/core';
 import {SitesService} from './service/sites.service';
+import {SiteListView} from './view/site-list/site-list.view';
+import {RouteConfig} from 'angular2/router';
+import {SiteDetailView} from './view/site-detail/site-detail.view';
+import {ROUTER_DIRECTIVES} from 'angular2/router';
+import {SitesStore} from './state/sites.store';
 @Component({
-    templateUrl: 'app/sites/sites.component.html',
+    template: '<router-outlet></router-outlet>',
     styleUrls: ['app/sites/sites.component.css'],
-    providers: [SitesService]
+    providers: [SitesService, SitesStore],
+    directives: [ROUTER_DIRECTIVES]
 })
-export class SitesComponent implements OnInit {
-
-    constructor(sitesService:SitesService) {
-        sitesService.getSites().subscribe(()=> {
-            console.log('subs');
-        });
-    }
-
-    ngOnInit():any {
-        return null;
-    }
+@RouteConfig([
+    {path: '', name: 'SiteList', component: SiteListView, useAsDefault: true},
+    {path: '/:id', name: 'SiteDetail', component: SiteDetailView}
+])
+export class SitesComponent {
 }
