@@ -1,9 +1,9 @@
 package nv.common.ddd.domain
 
-import akka.actor.{ActorLogging, ReceiveTimeout}
+import akka.actor.{ ActorLogging, ReceiveTimeout }
 import akka.cluster.sharding.ShardRegion.Passivate
-import akka.persistence.{PersistentActor, RecoveryCompleted, SnapshotOffer}
-import nv.common.ddd.domain.AggregateRoot.Commands.{GetAggregateState, GetState, SaveSnapshot, Stop}
+import akka.persistence.{ PersistentActor, RecoveryCompleted, SnapshotOffer }
+import nv.common.ddd.domain.AggregateRoot.Commands.{ GetState, SaveSnapshot, SetState, Stop }
 import nv.common.ddd.domain.AggregateRoot.Exceptions.UnHandledCommandReceived
 
 import scala.concurrent.duration._
@@ -18,6 +18,8 @@ object AggregateRoot {
     case object Stop
 
     case object SaveSnapshot
+
+    case class SetState(state: Any)
 
   }
 
@@ -85,6 +87,8 @@ trait AggregateRoot[S <: AggregateState[S, E], E <: DomainEvent] extends Persist
       context.stop(self)
     case GetState ⇒
       sender() ! state
+    case cmd: SetState ⇒
+      stateOpt = Some(cmd.state.asInstanceOf[S])
     case SaveSnapshot ⇒
       saveSnapshot(state)
   }

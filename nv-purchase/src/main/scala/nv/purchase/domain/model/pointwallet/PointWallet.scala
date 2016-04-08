@@ -1,11 +1,11 @@
 package nv.purchase.domain.model.pointwallet
 
-import akka.actor.{ActorLogging, Props}
+import akka.actor.{ ActorLogging, Props }
 import nv.account.domain.model.account.AccountId
 import nv.common.ddd.domain._
 import nv.purchase.domain.model.order.OrderId
-import nv.purchase.domain.model.pointwallet.PointWallet.Commands.{CancelUsePoint, ChargePoint, GetCurrentPoint, UsePoint}
-import nv.purchase.domain.model.pointwallet.PointWallet.Events.{PointCharged, PointUsed, PointWalletEvent, UsePointCanceled}
+import nv.purchase.domain.model.pointwallet.PointWallet.Commands.{ CancelUsePoint, ChargePoint, GetCurrentPoint, UsePoint }
+import nv.purchase.domain.model.pointwallet.PointWallet.Events.{ PointCharged, PointUsed, PointWalletEvent, UsePointCanceled }
 
 import scala.reflect._
 

@@ -10,6 +10,7 @@ import nv.common.ddd.infrastructure.{ DbConfig, IOExecutorSlick }
 import nv.discussion.domain.model.discussion.Discussion.Commands.CreateDiscussion
 import nv.discussion.domain.model.discussion.{ Discussion, DiscussionId }
 import nv.discussion.port.adapter.dao.{ CommentsDao, DiscussionsDao }
+import nv.discussion.port.adapter.dto.DiscussionDto
 import nv.testkit.persistent.DbSpecSupport
 import nv.testkit.support.TestSupport
 
@@ -69,6 +70,11 @@ class DiscussionProjectionSpec extends TestSupport with DbSpecSupport {
       projectionUpdater.startProjection(projection.update)
 
       actorRef ! CreateDiscussion(id, "title", true)
+
+      awaitAssert {
+        val f = sio.run(ddao.findById(id))
+        f.futureValue should ===(Some(DiscussionDto(id, "title", true)))
+      }
     }
   }
 
